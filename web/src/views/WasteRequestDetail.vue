@@ -286,4 +286,345 @@
                     <div>
                       <h3 class="text-subtitle-1 font-weight-bold">요청 취소</h3>
                       <p class="text-caption">
-                        요청이 취소
+                        요청이 취소되었습니다.
+                      </p>
+                    </div>
+                  </v-timeline-item>
+                </v-timeline>
+              </v-card-text>
+            </v-card>
+            
+            <!-- 완료 사진 -->
+            <v-card outlined class="mt-4" v-if="request.status === 'completed' && request.completionPhotos && request.completionPhotos.length > 0">
+              <v-card-title>완료 사진</v-card-title>
+              <v-card-text>
+                <v-row>
+                  <v-col
+                    v-for="(photo, index) in request.completionPhotos"
+                    :key="index"
+                    cols="12"
+                    sm="6"
+                    md="4"
+                    lg="3"
+                  >
+                    <v-card outlined>
+                      <v-img
+                        :src="photo.url"
+                        aspect-ratio="1"
+                        class="grey lighten-2"
+                        @click="openPhotoDialog(photo.url)"
+                      >
+                        <template v-slot:placeholder>
+                          <v-row
+                            class="fill-height ma-0"
+                            align="center"
+                            justify="center"
+                          >
+                            <v-progress-circular
+                              indeterminate
+                              color="grey lighten-5"
+                            ></v-progress-circular>
+                          </v-row>
+                        </template>
+                      </v-img>
+                      <v-card-text class="text-caption text-center">
+                        {{ formatDate(photo.uploadedAt) }}
+                      </v-card-text>
+                    </v-card>
+                  </v-col>
+                </v-row>
+              </v-card-text>
+            </v-card>
+          </template>
+        </v-col>
+      </v-row>
+    </v-container>
+    
+    <!-- 기사 배정 다이얼로그 -->
+    <request-assignment-modal
+      v-if="request"
+      :request="request"
+      :visible="assignDialog"
+      @close="assignDialog = false"
+      @assigned="handleAssigned"
+    ></request-assignment-modal>
+    
+    <!-- 취소 확인 다이얼로그 -->
+    <v-dialog v-model="cancelDialog" max-width="400">
+      <v-card>
+        <v-card-title>요청 취소</v-card-title>
+        <v-card-text>
+          <p>정말로 이 요청을 취소하시겠습니까?</p>
+          <p class="text-caption">이 작업은 되돌릴 수 없습니다.</p>
+          
+          <v-textarea
+            v-model="cancelReason"
+            label="취소 사유"
+            rows="3"
+            placeholder="취소 사유를 입력해주세요..."
+          ></v-textarea>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn text color="primary" @click="cancelDialog = false">취소</v-btn>
+          <v-btn color="error" @click="cancelRequest">확인</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    
+    <!-- 사진 확대 다이얼로그 -->
+    <v-dialog v-model="photoDialog" max-width="800">
+      <v-card>
+        <v-img
+          :src="selectedPhoto"
+          max-height="80vh"
+          contain
+        ></v-img>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn icon @click="photoDialog = false">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </div>
+</template>
+
+<script>
+import { mapState } from 'vuex'
+import L from 'leaflet'
+import RequestAssignmentModal from '@/components/RequestAssignmentModal'
+
+export default {
+  name: 'WasteRequestDetail',
+  
+  components: {
+    RequestAssignmentModal
+  },
+  
+  props: {
+    id: {
+      type: String,
+      required: true
+    }
+  },
+  
+  data: () => ({
+    map: null,
+    marker: null,
+    assignDialog: false,
+    cancelDialog: false,
+    cancelReason: '',
+    photoDialog: false,
+    selectedPhoto: ''
+  }),
+  
+  computed: {
+    ...mapState({
+      request: state => state.wasteRequests.currentRequest,
+      loading: state => state.wasteRequests.loading,
+      error: state => state.wasteRequests.error,
+      drivers: state => state.drivers.items,
+      vehicles: state => state.vehicles.items
+    })
+  },
+  
+  created() {
+    this.fetchRequestDetails()
+  },
+  
+  mounted() {
+    this.initMap()
+  },
+  
+  updated() {
+    this.updateMap()
+  },
+  
+  beforeDestroy() {
+    if (this.map) {
+      this.map.remove()
+    }
+  },
+  
+  methods: {
+    fetchRequestDetails() {
+      this.$store.dispatch('wasteRequests/fetchRequestById', this.id)
+    },
+    
+    initMap() {
+      if (!this.$el.querySelector('#map')) return
+      
+      // 지도 초기화
+      this.map = L.map('map', {
+        center: [37.5665, 126.9780], // 서울 좌표
+        zoom: 12,
+        zoomControl: false
+      })
+      
+      // 타일 레이어 추가
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(this.map)
+      
+      // 줌 컨트롤 위치 변경
+      L.control.zoom({
+        position: 'topright'
+      }).addTo(this.map)
+      
+      this.updateMap()
+    },
+    
+    updateMap() {
+      if (!this.map || !this.request || !this.request.location || !this.request.location.coordinates) return
+      
+      const [lng, lat] = this.request.location.coordinates
+      
+      // 이전 마커 제거
+      if (this.marker) {
+        this.marker.remove()
+      }
+      
+      // 새 마커 추가
+      this.marker = L.marker([lat, lng]).addTo(this.map)
+      
+      // 지도 중심 설정
+      this.map.setView([lat, lng], 15)
+    },
+    
+    formatDate(dateString) {
+      if (!dateString) return ''
+      
+      const date = new Date(dateString)
+      
+      return date.toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    },
+    
+    getStatusColor(status) {
+      const colors = {
+        requested: 'grey',
+        assigned: 'info',
+        in_progress: 'warning',
+        completed: 'success',
+        cancelled: 'error'
+      }
+      
+      return colors[status] || 'grey'
+    },
+    
+    getStatusText(status) {
+      const texts = {
+        requested: '요청됨',
+        assigned: '배정됨',
+        in_progress: '진행중',
+        completed: '완료됨',
+        cancelled: '취소됨'
+      }
+      
+      return texts[status] || '알 수 없음'
+    },
+    
+    getWasteTypeText(type) {
+      const types = {
+        general: '일반 폐기물',
+        recycle: '재활용',
+        food: '음식물',
+        construction: '건설 폐기물',
+        hazardous: '위험 폐기물'
+      }
+      
+      return types[type] || '알 수 없음'
+    },
+    
+    getDriverName(driverId) {
+      if (!driverId) return '미배정'
+      
+      const driver = this.drivers.find(d => d._id === driverId)
+      return driver ? driver.name : '알 수 없음'
+    },
+    
+    getVehicleNumber(vehicleId) {
+      if (!vehicleId) return ''
+      
+      const vehicle = this.vehicles.find(v => v._id === vehicleId)
+      return vehicle ? vehicle.vehicleNumber : ''
+    },
+    
+    openAssignDialog() {
+      this.assignDialog = true
+    },
+    
+    handleAssigned() {
+      this.assignDialog = false
+      this.fetchRequestDetails()
+      
+      this.$store.commit('notification/setNotification', {
+        message: '기사 배정이 완료되었습니다',
+        type: 'success'
+      })
+    },
+    
+    confirmCancel() {
+      this.cancelReason = ''
+      this.cancelDialog = true
+    },
+    
+    async cancelRequest() {
+      try {
+        await this.$store.dispatch('wasteRequests/updateRequest', {
+          id: this.id,
+          data: {
+            status: 'cancelled',
+            notes: this.request.notes + `\n\n취소 사유: ${this.cancelReason}`
+          }
+        })
+        
+        this.$store.commit('notification/setNotification', {
+          message: '요청이 취소되었습니다',
+          type: 'success'
+        })
+        
+        this.cancelDialog = false
+        this.fetchRequestDetails()
+      } catch (err) {
+        console.error('요청 취소 실패:', err)
+        
+        this.$store.commit('notification/setNotification', {
+          message: '오류가 발생했습니다: ' + (err.response?.data?.message || err.message),
+          type: 'error'
+        })
+      }
+    },
+    
+    openPhotoDialog(photoUrl) {
+      this.selectedPhoto = photoUrl
+      this.photoDialog = true
+    }
+  },
+  
+  watch: {
+    id() {
+      this.fetchRequestDetails()
+    }
+  }
+}
+</script>
+
+<style scoped>
+#map {
+  width: 100%;
+  height: 300px;
+  border-radius: 4px;
+}
+
+.v-timeline-item__body {
+  max-width: 100%;
+}
+</style>
