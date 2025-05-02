@@ -1,0 +1,22 @@
+# Render 배포 명세 파일 (Blueprint)
+services:
+  # 백엔드 서비스
+  - type: web
+    name: smartwaste-api
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: MONGODB_URI
+        sync: false
+      - key: NODE_ENV
+        value: production
+    autoDeploy: true
+
+# 필요한 데이터베이스는 Render.com UI에서 직접 생성하거나
+# MongoDB Atlas를 사용하는 것이 좋습니다.
