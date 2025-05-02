@@ -1,28 +1,98 @@
 <template>
   <div class="photo-uploader">
-    <div class="upload-area" @click="triggerFileInput">
-      <input 
-        type="file"
-        ref="fileInput"
-        accept="image/*"
-        @change="handleFileChange"
-        class="file-input"
-      />
-      <div class="upload-placeholder" v-if="!previewUrl">
-        <span class="upload-icon">📷</span>
-        <p class="upload-text">사진을 촬영하거나 업로드하세요</p>
-      </div>
-      <div class="preview-container" v-else>
-        <img :src="previewUrl" alt="미리보기" class="preview-image" />
-        <button @click.stop="clearImage" class="clear-btn">×</button>
-      </div>
-    </div>
+    <p class="text-subtitle-1 mb-2">
+      완료 사진 ({{ photos.length }}/5)
+    </p>
     
-    <div class="upload-actions" v-if="previewUrl">
-      <button @click="uploadPhoto" class="btn btn-primary" :disabled="uploading">
-        {{ uploading ? '업로드 중...' : '사진 업로드' }}
-      </button>
-    </div>
+    <v-row>
+      <!-- 업로드된 사진 -->
+      <v-col
+        v-for="(photo, index) in photos"
+        :key="index"
+        cols="6"
+        sm="4"
+        class="pa-2"
+      >
+        <v-card outlined class="photo-card">
+          <v-img
+            :src="photo.url"
+            aspect-ratio="1"
+            class="grey lighten-2"
+            @click="previewPhoto(photo.url)"
+          >
+            <template v-slot:placeholder>
+              <v-row
+                class="fill-height ma-0"
+                align="center"
+                justify="center"
+              >
+                <v-progress-circular
+                  indeterminate
+                  color="grey lighten-5"
+                ></v-progress-circular>
+              </v-row>
+            </template>
+          </v-img>
+          
+          <v-btn
+            absolute
+            fab
+            x-small
+            color="error"
+            class="photo-delete-btn"
+            @click="removePhoto(index)"
+          >
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card>
+      </v-col>
+      
+      <!-- 사진 추가 버튼 -->
+      <v-col
+        v-if="photos.length < 5"
+        cols="6"
+        sm="4"
+        class="pa-2"
+      >
+        <v-card
+          outlined
+          class="photo-card d-flex align-center justify-center"
+          height="100%"
+          @click="triggerFileInput"
+        >
+          <div class="text-center">
+            <v-icon size="36" color="primary">mdi-camera</v-icon>
+            <div class="mt-1 text-caption">사진 추가</div>
+          </div>
+        </v-card>
+      </v-col>
+    </v-row>
+    
+    <!-- 파일 인풋 (숨김) -->
+    <input
+      ref="fileInput"
+      type="file"
+      accept="image/*"
+      style="display: none"
+      @change="handleFileChange"
+    >
+    
+    <!-- 사진 미리보기 다이얼로그 -->
+    <v-dialog v-model="previewDialog" max-width="90vw">
+      <v-card>
+        <v-img
+          :src="previewUrl"
+          max-height="80vh"
+          contain
+        ></v-img>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn icon @click="previewDialog = false">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -31,186 +101,170 @@ export default {
   name: 'PhotoUploader',
   
   props: {
-    requestId: {
-      type: String,
-      required: true
+    photos: {
+      type: Array,
+      default: () => []
     }
   },
   
-  data() {
-    return {
-      file: null,
-      previewUrl: null,
-      uploading: false
-    }
-  },
+  data: () => ({
+    previewDialog: false,
+    previewUrl: '',
+    uploadingPhoto: false
+  }),
   
   methods: {
     triggerFileInput() {
-      if (!this.uploading) {
-        this.$refs.fileInput.click()
-      }
-    },
-    
-    handleFileChange(event) {
-      const file = event.target.files[0]
-      if (!file) return
-      
-      // 파일 크기 제한 (5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        this.$emit('error', '파일 크기는 5MB 이하여야 합니다.')
+      // 최대 5장까지만 업로드 가능
+      if (this.photos.length >= 5) {
+        this.$store.commit('notification/setNotification', {
+          message: '최대 5장까지만 업로드할 수 있습니다',
+          type: 'warning'
+        })
         return
       }
       
-      this.file = file
-      this.createPreview()
+      this.$refs.fileInput.click()
     },
     
-    createPreview() {
-      if (!this.file) return
+    async handleFileChange(event) {
+      const file = event.target.files[0]
+      if (!file) return
       
-      const reader = new FileReader()
-      reader.onload = () => {
-        this.previewUrl = reader.result
+      // 파일 유효성 검사
+      if (!file.type.match('image.*')) {
+        this.$store.commit('notification/setNotification', {
+          message: '이미지 파일만 업로드할 수 있습니다',
+          type: 'error'
+        })
+        return
       }
-      reader.readAsDataURL(this.file)
-    },
-    
-    clearImage(event) {
-      event.preventDefault()
-      this.file = null
-      this.previewUrl = null
-      this.$refs.fileInput.value = ''
-    },
-    
-    async uploadPhoto() {
-      if (!this.file || !this.previewUrl) return
       
-      this.uploading = true
+      // 파일 크기 제한 (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        this.$store.commit('notification/setNotification', {
+          message: '이미지 크기는 5MB 이하여야 합니다',
+          type: 'error'
+        })
+        return
+      }
       
-      try {
-        // 기존 요청 데이터 가져오기
-        const response = await fetch(`/api/waste-requests/${this.requestId}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
+      // 파일 업로드 처리
+      this.uploadingPhoto = true
+      
+try {
+        // 이미지 최적화 (리사이징)
+        const optimizedFile = await this.optimizeImage(file)
+        
+        // 이미지 업로드 이벤트 발생
+        this.$emit('add', optimizedFile)
+      } catch (err) {
+        console.error('이미지 업로드 처리 실패:', err)
+        
+        this.$store.commit('notification/setNotification', {
+          message: '이미지 처리 중 오류가 발생했습니다',
+          type: 'error'
         })
-        
-        if (!response.ok) {
-          throw new Error('요청 정보를 가져오는데 실패했습니다.')
-        }
-        
-        const requestData = await response.json()
-        
-        // 기존 사진 배열에 새 사진 추가
-        const photos = [...(requestData.photos || []), this.previewUrl]
-        
-        // 요청 업데이트
-        const updateResponse = await fetch(`/api/waste-requests/${this.requestId}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-          body: JSON.stringify({ photos })
-        })
-        
-        if (!updateResponse.ok) {
-          throw new Error('사진 업로드에 실패했습니다.')
-        }
-        
-        // 업데이트 성공 이벤트 발생
-        this.$emit('uploaded', this.previewUrl)
-        
-        // 폼 초기화
-        this.file = null
-        this.previewUrl = null
-        this.$refs.fileInput.value = ''
-      } catch (error) {
-        this.$emit('error', error.message)
       } finally {
-        this.uploading = false
+        this.uploadingPhoto = false
+        
+        // 파일 인풋 초기화
+        this.$refs.fileInput.value = ''
       }
+    },
+    
+    removePhoto(index) {
+      this.$emit('remove', index)
+    },
+    
+    previewPhoto(url) {
+      this.previewUrl = url
+      this.previewDialog = true
+    },
+    
+    // 이미지 최적화 함수
+    optimizeImage(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        
+        reader.onload = event => {
+          const img = new Image()
+          
+          img.onload = () => {
+            // 최대 크기 설정 (1080px)
+            const MAX_WIDTH = 1080
+            const MAX_HEIGHT = 1080
+            
+            let width = img.width
+            let height = img.height
+            
+            // 이미지 리사이징
+            if (width > height) {
+              if (width > MAX_WIDTH) {
+                height *= MAX_WIDTH / width
+                width = MAX_WIDTH
+              }
+            } else {
+              if (height > MAX_HEIGHT) {
+                width *= MAX_HEIGHT / height
+                height = MAX_HEIGHT
+              }
+            }
+            
+            // 캔버스 생성
+            const canvas = document.createElement('canvas')
+            canvas.width = width
+            canvas.height = height
+            
+            // 이미지 그리기
+            const ctx = canvas.getContext('2d')
+            ctx.drawImage(img, 0, 0, width, height)
+            
+            // 이미지 품질 설정 (JPEG 형식, 80% 품질)
+            canvas.toBlob(blob => {
+              // Blob에 파일 이름 추가
+              const optimizedFile = new File([blob], file.name, {
+                type: 'image/jpeg',
+                lastModified: new Date().getTime()
+              })
+              
+              resolve(optimizedFile)
+            }, 'image/jpeg', 0.8)
+          }
+          
+          img.onerror = err => {
+            reject(err)
+          }
+          
+          img.src = event.target.result
+        }
+        
+        reader.onerror = err => {
+          reject(err)
+        }
+        
+        reader.readAsDataURL(file)
+      })
     }
   }
 }
 </script>
 
 <style scoped>
-.photo-uploader {
-  margin-bottom: 20px;
-}
-
-.upload-area {
+.photo-card {
   position: relative;
-  width: 100%;
-  height: 200px;
-  border: 2px dashed #ddd;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  overflow: hidden;
-  background-color: #f9f9f9;
-}
-
-.file-input {
-  position: absolute;
-  width: 0;
-  height: 0;
-  opacity: 0;
-}
-
-.upload-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #999;
-}
-
-.upload-icon {
-  font-size: 36px;
-  margin-bottom: 10px;
-}
-
-.upload-text {
-  font-size: 14px;
-}
-
-.preview-container {
-  position: relative;
-  width: 100%;
   height: 100%;
+  transition: transform 0.2s;
 }
 
-.preview-image {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+.photo-card:hover {
+  transform: scale(1.02);
 }
 
-.clear-btn {
+.photo-delete-btn {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background-color: rgba(0, 0, 0, 0.5);
-  color: white;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  cursor: pointer;
-}
-
-.upload-actions {
-  margin-top: 16px;
-  display: flex;
-  justify-content: flex-end;
+  top: -8px;
+  right: -8px;
+  z-index: 1;
 }
 </style>
