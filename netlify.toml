@@ -1,12 +1,14 @@
 # 웹 프론트엔드(관리자용) 배포 설정
 [context.production]
   # production 브랜치의 기본 설정
+  base = "web"
   command = "cd web && npm install && npm run build"
   publish = "web/dist"
 
 # 모바일 앱 배포를 위한 별도 사이트 설정
 # 이 설정은 Netlify UI에서 새 사이트를 만들 때 사용합니다
 [context.app]
+  base = "app"
   command = "cd app && npm install && npm run build"
   publish = "app/dist"
 
