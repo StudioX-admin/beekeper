@@ -1,0 +1,268 @@
+/* 모바일 앱 전역 스타일 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background-color: #f5f5f5;
+  color: #333;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  position: relative;
+  max-width: 100vw;
+}
+
+/* 모바일에서 당겨서 새로고침 방지 */
+html, body {
+  overscroll-behavior: none;
+}
+
+/* 컨테이너 및 레이아웃 */
+.page-container {
+  padding: 16px;
+  padding-bottom: 80px; /* 하단 네비게이션 높이 + 여유 공간 */
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #333;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 24px 0 12px;
+  color: #333;
+}
+
+/* 버튼 스타일 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  text-align: center;
+  transition: background-color 0.3s, transform 0.1s;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 버튼 탭 효과 */
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-primary {
+  background-color: #4caf50;
+  color: white;
+}
+
+.btn-secondary {
+  background-color: #2196f3;
+  color: white;
+}
+
+.btn-danger {
+  background-color: #f44336;
+  color: white;
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid #ddd;
+  color: #666;
+}
+
+.btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+/* 카드 스타일 */
+.card {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+/* 폼 스타일 */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #555;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s;
+  -webkit-appearance: none;
+}
+
+.form-control:focus {
+  border-color: #4caf50;
+  outline: none;
+}
+
+/* 입력필드 활성화 시 효과 */
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #4caf50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+/* 상태 표시 뱃지 */
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-badge.pending {
+  background-color: #fff8e1;
+  color: #ff8f00;
+}
+
+.status-badge.assigned {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.status-badge.in-progress {
+  background-color: #e8f5e9;
+  color: #43a047;
+}
+
+.status-badge.completed {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+/* 알림 및 메시지 스타일 */
+.alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.alert-success {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-left: 4px solid #4caf50;
+}
+
+.alert-error {
+  background-color: #ffebee;
+  color: #c62828;
+  border-left: 4px solid #f44336;
+}
+
+.alert-warning {
+  background-color: #fff8e1;
+  color: #ff8f00;
+  border-left: 4px solid #ffc107;
+}
+
+.alert-info {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-left: 4px solid #2196f3;
+}
+
+/* 로딩 표시기 */
+.loading-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 0;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #4caf50;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 빈 상태 표시 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: #999;
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  color: #ccc;
+}
+
+/* 모달 스타일 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 20px;
+  position: relative;
+}
+
+/* 앱 미리 로드하기 */
+.preload * {
+  transition: none !important;
+}
