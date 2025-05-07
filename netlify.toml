@@ -1,20 +1,18 @@
 # 웹 프론트엔드(관리자용) 배포 설정
-[context.production]
-  # production 브랜치의 기본 설정
-  base = "web"
-  command = "npm install && npm run build"
+[build]
+  command = "cd web && npm install && npm run build"
   publish = "web/dist"
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF ./web/"
 
 # 모바일 앱 배포를 위한 별도 사이트 설정
 # 이 설정은 Netlify UI에서 새 사이트를 만들 때 사용합니다
 [context.app]
-  base = "app"
-  command = "npm install && npm run build"
+  command = "cd app && npm install && npm run build"
   publish = "app/dist"
 
 # 개발 환경 설정 (deploy-preview, branch-deploy)
 [context.deploy-preview]
-  command = "npm install && npm run build"
+  command = "cd web && npm install && npm run build"
   publish = "web/dist"
 
 # 웹 관리자용 프론트엔드에 대한 추가 설정
@@ -30,3 +28,19 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+# 환경 변수 설정
+[build.environment]
+  NODE_VERSION = "16"
+  NPM_FLAGS = "--legacy-peer-deps"
+  NODE_ENV = "production"
+
+# 캐시 설정
+[[headers]]
+  for = "/*"
+    [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# 빌드 플러그인 설정
+[[plugins]]
+  package = "@netlify/plugin-cache-core"
