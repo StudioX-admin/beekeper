@@ -1,90 +1,54 @@
 <template>
   <div class="login-page">
     <div class="login-container">
-      <div class="login-logo">
-        <img src="@/assets/logo.png" alt="스마트폐기물관리 로고" />
-      </div>
-      <h1 class="login-title">스마트폐기물관리</h1>
-      <p class="login-subtitle">관리자 웹 사이트</p>
-      
-      <div class="login-form">
+      <h1>Login</h1>
+      <form @submit.prevent="login">
         <div class="form-group">
-          <label for="username">아이디</label>
-          <input
-            type="text"
-            id="username"
-            v-model="username"
-            class="form-control"
-            placeholder="아이디를 입력하세요"
-            @keypress.enter="login"
-          />
+          <label for="email">Email</label>
+          <input type="email" id="email" v-model="email" required>
         </div>
-        
         <div class="form-group">
-          <label for="password">비밀번호</label>
-          <input
-            type="password"
-            id="password"
-            v-model="password"
-            class="form-control"
-            placeholder="비밀번호를 입력하세요"
-            @keypress.enter="login"
-          />
+          <label for="password">Password</label>
+          <input type="password" id="password" v-model="password" required>
         </div>
-        
-        <div v-if="error" class="error-message">
-          {{ error }}
-        </div>
-        
-        <button @click="login" class="login-btn" :disabled="loading || !isFormValid">
-          {{ loading ? '로그인 중...' : '로그인' }}
+        <button type="submit" :disabled="loading">
+          {{ loading ? 'Logging in...' : 'Login' }}
         </button>
-        
-        <div class="login-options">
-          <router-link to="/register" class="register-link">계정 만들기</router-link>
-        </div>
-      </div>
+        <p v-if="error" class="error-message">{{ error }}</p>
+      </form>
+      <p>Don't have an account? <router-link to="/register">Register</router-link></p>
     </div>
   </div>
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex'
-
 export default {
   name: 'Login',
   data() {
     return {
-      username: '',
-      password: ''
-    }
-  },
-  computed: {
-    ...mapGetters(['loading', 'error']),
-    isFormValid() {
-      return this.username.trim() !== '' && this.password.trim() !== ''
+      email: '',
+      password: '',
+      loading: false,
+      error: null
     }
   },
   methods: {
-    ...mapActions(['login']),
-    async doLogin() {
-      if (!this.isFormValid) return
+    async login() {
+      this.loading = true;
+      this.error = null;
       
       try {
-        const user = await this.login({
-          username: this.username,
-          password: this.password
-        })
-        
-        // 사용자 역할에 따라 리다이렉트
-        if (user.role === 'admin') {
-          this.$router.push({ name: 'AdminDashboard' })
-        } else {
-          this.$router.push({ name: 'WasteRequests' })
-        }
-      } catch (error) {
-        // 에러는 스토어에서 처리
-        console.error('로그인 오류', error)
+        // Add your login logic here
+        // Example:
+        // await this.$store.dispatch('auth/login', {
+        //   email: this.email,
+        //   password: this.password
+        // });
+        // this.$router.push('/dashboard');
+      } catch (err) {
+        this.error = 'Invalid credentials. Please try again.';
+      } finally {
+        this.loading = false;
       }
     }
   }
@@ -98,116 +62,69 @@ export default {
   align-items: center;
   min-height: 100vh;
   background-color: #f5f5f5;
-  padding: 20px;
 }
 
 .login-container {
-  background-color: white;
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 400px;
-  padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-.login-logo {
+h1 {
   text-align: center;
-  margin-bottom: 20px;
-}
-
-.login-logo img {
-  height: 60px;
-}
-
-.login-title {
-  font-size: 24px;
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 5px;
-  color: #333;
-}
-
-.login-subtitle {
-  text-align: center;
-  font-size: 16px;
-  color: #666;
-  margin-bottom: 30px;
-}
-
-.login-form {
-  margin-top: 20px;
+  margin-bottom: 1.5rem;
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 1rem;
 }
 
 label {
   display: block;
-  margin-bottom: 8px;
-  font-size: 14px;
-  color: #555;
+  margin-bottom: 0.5rem;
   font-weight: 500;
 }
 
-.form-control {
+input {
   width: 100%;
-  padding: 12px 15px;
+  padding: 0.75rem;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 14px;
-  transition: border-color 0.3s;
+  font-size: 1rem;
 }
 
-.form-control:focus {
-  border-color: #4caf50;
-  outline: none;
-}
-
-.login-btn {
+button {
   width: 100%;
-  padding: 12px;
-  background-color: #4caf50;
+  padding: 0.75rem;
+  background-color: #4CAF50;
   color: white;
   border: none;
   border-radius: 4px;
-  font-size: 16px;
+  font-size: 1rem;
   cursor: pointer;
-  transition: background-color 0.3s;
-  margin-top: 10px;
+  margin-top: 1rem;
 }
 
-.login-btn:hover:not(:disabled) {
-  background-color: #43a047;
+button:hover {
+  background-color: #45a049;
 }
 
-.login-btn:disabled {
-  background-color: #a5d6a7;
+button:disabled {
+  background-color: #cccccc;
   cursor: not-allowed;
 }
 
 .error-message {
-  background-color: #ffebee;
-  color: #c62828;
-  padding: 10px 15px;
-  border-radius: 4px;
-  font-size: 14px;
-  margin-bottom: 15px;
-}
-
-.login-options {
-  margin-top: 20px;
+  color: #ff0000;
+  margin-top: 1rem;
   text-align: center;
 }
 
-.register-link {
-  color: #4caf50;
+a {
+  color: #4CAF50;
   text-decoration: none;
-  font-size: 14px;
 }
-
-.register-link:hover {
-  text-decoration: underline;
-}
-
-          
+</style>
