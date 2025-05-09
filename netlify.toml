@@ -31,8 +31,8 @@
 
 # 환경 변수 설정
 [build.environment]
-  NODE_VERSION = "16"
-  NPM_FLAGS = "--legacy-peer-deps"
+  NODE_VERSION = "16.x"
+  VUE_APP_API_URL = "https://beekeper-d0e3.onrender.com"
   NODE_ENV = "production"
 
 # 캐시 설정
