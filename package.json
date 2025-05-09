@@ -4,7 +4,7 @@
   "description": "BeeKeper Smart Waste Management Platform API",
   "main": "server.js",
   "engines": {
-    "node": "18.x"
+    "node": "18"
   },
   "scripts": {
     "start": "node server.js",
