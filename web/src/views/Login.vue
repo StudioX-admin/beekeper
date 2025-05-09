@@ -1,11 +1,7 @@
-<!-- web/src/views/Login.vue -->
 <template>
   <div class="login-page">
     <div class="login-container">
       <h1>로그인</h1>
-      <div v-if="registered" class="success-message">
-        회원가입이 완료되었습니다. 로그인해주세요.
-      </div>
       <form @submit.prevent="login">
         <div class="form-group">
           <label for="email">이메일</label>
@@ -26,7 +22,7 @@
 </template>
 
 <script>
-import AuthService from '@/services/auth';
+import axios from 'axios';
 
 export default {
   name: 'Login',
@@ -35,18 +31,8 @@ export default {
       email: '',
       password: '',
       loading: false,
-      error: null,
-      registered: false
+      error: null
     };
-  },
-  created() {
-    // 이미 로그인되어 있으면 대시보드로 리디렉션
-    if (AuthService.isAuthenticated()) {
-      this.$router.push('/');
-    }
-    
-    // 회원가입 후 리디렉션 체크
-    this.registered = this.$route.query.registered === 'true';
   },
   methods: {
     async login() {
@@ -54,8 +40,16 @@ export default {
       this.error = null;
       
       try {
-        await AuthService.login(this.email, this.password);
-        this.$router.push('/');
+        const response = await axios.post(
+          `${process.env.VUE_APP_API_URL || 'https://beekeper-d0e3.onrender.com/api'}/auth/login`, 
+          { email: this.email, password: this.password }
+        );
+        
+        if (response.data.token) {
+          localStorage.setItem('token', response.data.token);
+          localStorage.setItem('user', JSON.stringify(response.data.user));
+          this.$router.push('/');
+        }
       } catch (err) {
         console.error('로그인 오류:', err);
         this.error = err.response?.data?.message || '로그인에 실패했습니다.';
@@ -72,7 +66,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh;
   background-color: #f5f5f5;
 }
 
@@ -124,14 +118,6 @@ button:disabled {
 .error-message {
   color: #f44336;
   margin-top: 1rem;
-}
-
-.success-message {
-  color: #4CAF50;
-  margin-bottom: 1rem;
-  padding: 0.75rem;
-  background-color: #e8f5e9;
-  border-radius: 4px;
 }
 
 a {
