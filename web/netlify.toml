@@ -4,7 +4,7 @@
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "16.x"
+  NODE_VERSION = "18"
   VUE_APP_API_URL = "https://beekeper-d0e3.onrender.com"
 
 [[redirects]]
