@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const connectDB = require('./config/db');
+const connectDB = require('./server/config/db');
 const authRoutes = require('./routes/auth');
 const wasteRequestRoutes = require('./routes/waste-requests');
 const vehicleRoutes = require('./routes/vehicles');
@@ -15,7 +15,7 @@ const app = express();
 
 // CORS 설정 (수정됨)
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN || '*',
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token'],
   credentials: true
@@ -26,10 +26,19 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' })); // 이미지 업로드를 위해 용량 제한 설정
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// 데이터베이스 연결
-connectDB()
-  .then(() => console.log('데이터베이스 초기화 완료'))
-  .catch(err => console.error('데이터베이스 초기화 실패:', err));
+// 데이터베이스 연결 재시도 로직 추가
+const connectWithRetry = async () => {
+  try {
+    await connectDB();
+    console.log('데이터베이스 초기화 완료');
+  } catch (err) {
+    console.error('데이터베이스 초기화 실패:', err);
+    console.log('5초 후 재시도...');
+    setTimeout(connectWithRetry, 5000);
+  }
+};
+
+connectWithRetry();
 
 // 라우트 설정
 app.use('/api/auth', authRoutes);

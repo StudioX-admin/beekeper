@@ -1,22 +1,46 @@
 # Render 배포 명세 파일 (Blueprint)
-services:
-  # 백엔드 서비스
-  - type: web
-    name: smartwaste-api
-    env: node
-    buildCommand: npm install
-    startCommand: node server.js
-    healthCheckPath: /
-    envVars:
-      - key: PORT
-        value: 10000
-      - key: JWT_SECRET
-        generateValue: true
-      - key: MONGODB_URI
-        sync: false
-      - key: NODE_ENV
-        value: production
-    autoDeploy: true
-
+   services:
+     - type: web
+       name: smartwaste-api
+       env: node
+       buildCommand: npm install
+       startCommand: npm start
+       healthCheckPath: /health
+       envVars:
+         - key: PORT
+           value: 10000
+         - key: JWT_SECRET
+           generateValue: true
+         - key: MONGODB_URI
+           sync: false
+         - key: NODE_ENV
+           value: production
+         - key: CORS_ORIGIN
+           sync: false
 # 필요한 데이터베이스는 Render.com UI에서 직접 생성하거나
 # MongoDB Atlas를 사용하는 것이 좋습니다.
+// web/.env.production
+VUE_APP_API_URL=https://your-render-backend-url.onrender.com
+VUE_APP_MAP_API_KEY=your_map_api_key
+
+// web/src/api/config.js
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: process.env.VUE_APP_API_URL,
+  timeout: 5000,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
+
+// 토큰 인터셉터 추가
+api.interceptors.request.use(config => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export default api;
