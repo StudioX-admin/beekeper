@@ -1,7 +1,14 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
-import store from './store'
+import axios from 'axios'
+
+// axios 기본 설정
+axios.defaults.baseURL = process.env.VUE_APP_API_URL || 'https://beekeper-d0e3.onrender.com/api';
+
+const app = createApp(App)
+app.use(router)
+app.mount('#app')
 
 // CSS 스타일 임포트
 import './assets/css/main.css'
