@@ -17,11 +17,11 @@
 
 # 웹 관리자용 프론트엔드에 대한 추가 설정
 [context.production.environment]
-  NODE_VERSION = "16"
+  NODE_VERSION = "18"
 
 # 기사용 앱을 위한 추가 설정
 [context.app.environment]
-  NODE_VERSION = "16"
+  NODE_VERSION = "18"
 
 # SPA를 위한 리다이렉트 설정
 [[redirects]]
@@ -31,7 +31,7 @@
 
 # 환경 변수 설정
 [build.environment]
-  NODE_VERSION = "18.x"
+  NODE_VERSION = "18"
   VUE_APP_API_URL = "https://beekeper-d0e3.onrender.com"
   NODE_ENV = "production"
 
