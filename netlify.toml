@@ -32,7 +32,7 @@
 # 환경 변수 설정
 [build.environment]
   NODE_VERSION = "18"
-  VUE_APP_API_URL = "https://beekeper-d0e3.onrender.com"
+  VUE_APP_API_URL = "https://beekeper-d0e3.onrender.com/api"
   NODE_ENV = "production"
 
 # 캐시 설정
