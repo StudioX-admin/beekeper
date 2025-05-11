@@ -1,7 +1,7 @@
 <template>
   <div class="login-page">
     <div class="login-container">
-      <h1>로그인</h1>
+      <h1>BeeKeper 로그인</h1>
       <form @submit.prevent="login">
         <div class="form-group">
           <label for="email">이메일</label>
@@ -40,10 +40,10 @@ export default {
       this.error = null;
       
       try {
-        const response = await axios.post(
-          `${process.env.VUE_APP_API_URL || 'https://beekeper-d0e3.onrender.com/api'}/auth/login`, 
-          { email: this.email, password: this.password }
-        );
+        const response = await axios.post('/auth/login', {
+          email: this.email,
+          password: this.password
+        });
         
         if (response.data.token) {
           localStorage.setItem('token', response.data.token);
