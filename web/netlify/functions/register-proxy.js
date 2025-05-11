@@ -20,8 +20,6 @@ exports.handler = async function(event, context) {
       username: data.name || 'user_' + Math.random().toString(36).substring(2, 10),
     };
     
-    console.log('Sending request to backend:', JSON.stringify(transformedData));
-    
     // 백엔드 API로 요청 전달
     const response = await fetch("https://beekeper-d0e3.onrender.com/api/auth/register", {
       method: "POST",
@@ -47,7 +45,6 @@ exports.handler = async function(event, context) {
       body: JSON.stringify(responseData)
     };
   } catch (error) {
-    console.error('Error in register-proxy:', error);
     return {
       statusCode: 500,
       body: JSON.stringify({ message: "서버 오류", error: error.message })
