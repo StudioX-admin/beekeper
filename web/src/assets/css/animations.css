@@ -1,0 +1,158 @@
+/* web/src/assets/css/animations.css */
+/* 애니메이션 및 전환 효과 */
+
+/* 페이드 인 애니메이션 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation: fadeIn var(--transition-normal) var(--easing-default);
+}
+
+/* 슬라이드 인 애니메이션 */
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.slide-in-left {
+  animation: slideInLeft var(--transition-normal) var(--easing-default);
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.slide-in-right {
+  animation: slideInRight var(--transition-normal) var(--easing-default);
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.slide-in-up {
+  animation: slideInUp var(--transition-normal) var(--easing-default);
+}
+
+/* 페이지 전환 효과 */
+.page-enter-active,
+.page-leave-active {
+  transition: 
+    opacity var(--transition-normal) var(--easing-default),
+    transform var(--transition-normal) var(--easing-default);
+}
+
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+/* 모달 전환 효과 */
+.modal-enter-active,
+.modal-leave-active {
+  transition: 
+    opacity var(--transition-normal) var(--easing-default),
+    transform var(--transition-normal) var(--easing-default);
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+/* 로딩 스피너 애니메이션 */
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--text-light);
+  animation: rotate 1s infinite linear;
+}
+
+.spinner-dark {
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-top-color: var(--text-primary);
+}
+
+.spinner-sm {
+  width: 1rem;
+  height: 1rem;
+  border-width: 2px;
+}
+
+.spinner-lg {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-width: 3px;
+}
+
+/* 펄스 애니메이션 */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+/* 섹션 입장 애니메이션 (스크롤에 따른 효과) */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: 
+    opacity var(--transition-normal) var(--easing-default),
+    transform var(--transition-normal) var(--easing-default);
+}
+
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+}
