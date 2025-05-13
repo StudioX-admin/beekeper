@@ -2,38 +2,57 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  username: {
-    type: String,
-    trim: true,
-    // username이 제공되지 않으면 name 필드를 사용
-    default: function() {
-      return this.name;
+const UserSchema = new mongoose.Schema(
+  {
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true
+    },
+    password: {
+      type: String,
+      required: true
+    },
+    name: {
+      type: String,
+      required: true
+    },
+    role: {
+      type: String,
+      enum: ['admin', 'driver'],
+      default: 'driver'
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true
+    },
+    phone: {
+      type: String,
+      required: true
+    },
+    profileImage: {
+      type: String
+    },
+    vehicleId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Vehicle'
+    },
+    status: {
+      type: String,
+      enum: ['active', 'inactive', 'suspended'],
+      default: 'active'
     }
   },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-    lowercase: true
-  },
-  password: {
-    type: String,
-    required: true
-  },
-  // 추가 필드...
-}, {
-  timestamps: true
-});
+  {
+    timestamps: true
+  }
+);
 
-// 비밀번호 해싱
-userSchema.pre('save', async function(next) {
+// 비밀번호 해싱 미들웨어
+UserSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   
   try {
@@ -45,11 +64,9 @@ userSchema.pre('save', async function(next) {
   }
 });
 
-// 비밀번호 검증 메서드
-userSchema.methods.comparePassword = async function(candidatePassword) {
+// 비밀번호 검증 메소드
+UserSchema.methods.comparePassword = async function(candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-const User = mongoose.model('User', userSchema);
-
-module.exports = User;
+module.exports = mongoose.model('User', UserSchema);
