@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BeeKeper 회원가입</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .register-container {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #2c3e50;
+    }
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 1rem;
+      font-size: 1rem;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+    .error-message {
+      color: #f44336;
+      margin-top: 1rem;
+    }
+    .success-message {
+      color: #4CAF50;
+      margin-top: 1rem;
+    }
+    a {
+      color: #4CAF50;
+      text-decoration: none;
+    }
+    .login-link {
+      text-align: center;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="register-container">
+    <h1>BeeKeper 회원가입</h1>
+    <div id="register-form">
+      <div class="form-group">
+        <label for="name">이름</label>
+        <input type="text" id="name" required>
+      </div>
+      <div class="form-group">
+        <label for="username">사용자명 (이름과 동일하게 자동 입력됩니다)</label>
+        <input type="text" id="username" readonly>
+      </div>
+      <div class="form-group">
+        <label for="email">이메일</label>
+        <input type="email" id="email" required>
+      </div>
+      <div class="form-group">
+        <label for="password">비밀번호</label>
+        <input type="password" id="password" required>
+      </div>
+      <div class="form-group">
+        <label for="confirm-password">비밀번호 확인</label>
+        <input type="password" id="confirm-password" required>
+      </div>
+      <button id="register-button" type="button">회원가입</button>
+      <p id="message" class="error-message" style="display: none;"></p>
+      <p class="login-link">이미 계정이 있으신가요? <a href="login.html">로그인</a></p>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const registerButton = document.getElementById('register-button');
+      const nameInput = document.getElementById('name');
+      const usernameInput = document.getElementById('username');
+      const emailInput = document.getElementById('email');
+      const passwordInput = document.getElementById('password');
+      const confirmPasswordInput = document.getElementById('confirm-password');
+      const messageElement = document.getElementById('message');
+
+      // 이름 입력 시 사용자명 자동 입력
+      nameInput.addEventListener('input', function() {
+        usernameInput.value = nameInput.value;
+      });
+
+      // 회원가입 버튼 클릭 이벤트
+      registerButton.addEventListener('click', function() {
+        // 입력값 검증
+        if (!nameInput.value || !emailInput.value || !passwordInput.value || !confirmPasswordInput.value) {
+          showMessage('모든 필드를 입력해주세요.', 'error');
+          return;
+        }
+
+        if (passwordInput.value !== confirmPasswordInput.value) {
+          showMessage('비밀번호가 일치하지 않습니다.', 'error');
+          return;
+        }
+
+        // 로딩 상태 표시
+        registerButton.disabled = true;
+        registerButton.textContent = '처리 중...';
+        
+        // 백엔드 API 호출
+        fetch('https://beekeper-d0e3.onrender.com/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: nameInput.value,
+            username: nameInput.value, // 사용자명을 이름과 동일하게 설정
+            email: emailInput.value,
+            password: passwordInput.value
+          })
+        })
+        .then(response => {
+          if (!response.ok) {
+            return response.json().then(data => {
+              throw new Error(data.message || '회원가입에 실패했습니다.');
+            });
+          }
+          return response.json();
+        })
+        .then(data => {
+          // 회원가입 성공
+          showMessage('회원가입 성공! 로그인 페이지로 이동합니다.', 'success');
+          
+          // 로그인 페이지로 리디렉션
+          setTimeout(() => {
+            window.location.href = 'login.html';
+          }, 1500);
+        })
+        .catch(error => {
+          // 오류 표시
+          showMessage(error.message, 'error');
+          registerButton.disabled = false;
+          registerButton.textContent = '회원가입';
+        });
+      });
+
+      // 메시지 표시 함수
+      function showMessage(text, type) {
+        messageElement.textContent = text;
+        messageElement.style.display = 'block';
+        
+        if (type === 'error') {
+          messageElement.className = 'error-message';
+        } else if (type === 'success') {
+          messageElement.className = 'success-message';
+        }
+      }
+    });
+  </script>
+</body>
+</html>
