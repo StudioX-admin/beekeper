@@ -1,0 +1,6 @@
+/* web/src/assets/css/fonts.css */
+/* Noto Sans KR 폰트 적용 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+/* 기타 아이콘 폰트 설정 */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css');
