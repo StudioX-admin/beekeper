@@ -1,264 +1,172 @@
-import { createStore } from 'vuex'
-import axios from 'axios'
+// web/src/store/index.js
+import Vue from 'vue'
+import Vuex from 'vuex'
+import api from '@/api'
 
-const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:5000/api'
+Vue.use(Vuex)
 
-// API 인스턴스 생성
-const api = axios.create({
-  baseURL: apiUrl,
-  headers: {
-    'Content-Type': 'application/json'
-  }
-})
-
-// 요청 인터셉터 - 토큰 추가
-api.interceptors.request.use(
-  config => {
-    const token = localStorage.getItem('token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
-    return config
-  },
-  error => Promise.reject(error)
-)
-
-export default createStore({
+export default new Vuex.Store({
   state: {
-    token: null,
     user: null,
+    token: localStorage.getItem('token') || null,
     wasteRequests: [],
+    pagination: {
+      total: 0,
+      page: 1,
+      limit: 10,
+      pages: 0
+    },
+    users: [],
     vehicles: [],
-    drivers: [],
-    dashboardData: null,
     loading: false,
     error: null
   },
-  getters: {
-    isAuthenticated: state => !!state.token,
-    isAdmin: state => state.user?.role === 'admin',
-    user: state => state.user,
-    token: state => state.token,
-    wasteRequests: state => state.wasteRequests,
-    vehicles: state => state.vehicles,
-    drivers: state => state.drivers,
-    dashboardData: state => state.dashboardData,
-    loading: state => state.loading,
-    error: state => state.error
-  },
   mutations: {
-    setAuth(state, { token, user }) {
-      state.token = token
-      state.user = user
+    SET_USER(state, user) {
+      state.user = user;
     },
-    clearAuth(state) {
-      state.token = null
-      state.user = null
-    },
-    setWasteRequests(state, wasteRequests) {
-      state.wasteRequests = wasteRequests
-    },
-    addWasteRequest(state, wasteRequest) {
-      state.wasteRequests.unshift(wasteRequest)
-    },
-    updateWasteRequest(state, updatedRequest) {
-      const index = state.wasteRequests.findIndex(req => req._id === updatedRequest._id)
-      if (index !== -1) {
-        state.wasteRequests.splice(index, 1, updatedRequest)
+    SET_TOKEN(state, token) {
+      state.token = token;
+      if (token) {
+        localStorage.setItem('token', token);
+      } else {
+        localStorage.removeItem('token');
       }
     },
-    setVehicles(state, vehicles) {
-      state.vehicles = vehicles
+    SET_WASTE_REQUESTS(state, { wasteRequests, pagination }) {
+      state.wasteRequests = wasteRequests;
+      state.pagination = pagination;
     },
-    setDrivers(state, drivers) {
-      state.drivers = drivers
+    SET_USERS(state, users) {
+      state.users = users;
     },
-    setDashboardData(state, data) {
-      state.dashboardData = data
+    SET_VEHICLES(state, vehicles) {
+      state.vehicles = vehicles;
     },
-    setLoading(state, loading) {
-      state.loading = loading
+    SET_LOADING(state, loading) {
+      state.loading = loading;
     },
-    setError(state, error) {
-      state.error = error
-    },
-    clearError(state) {
-      state.error = null
+    SET_ERROR(state, error) {
+      state.error = error;
     }
   },
   actions: {
     // 인증 관련 액션
-    setAuth({ commit }, { token, user }) {
-      localStorage.setItem('token', token)
-      localStorage.setItem('user', JSON.stringify(user))
-      commit('setAuth', { token, user })
-    },
-    logout({ commit }) {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      commit('clearAuth')
-    },
-    async login({ dispatch, commit }, credentials) {
+    async login({ commit }, credentials) {
+      commit('SET_LOADING', true);
+      commit('SET_ERROR', null);
       try {
-        commit('setLoading', true)
-        commit('clearError')
-        
-        const response = await api.post('/auth/login', credentials)
-        const { token, user } = response.data
-        
-        dispatch('setAuth', { token, user })
-        
-        return user
+        const response = await api.auth.login(credentials);
+        commit('SET_USER', response.data.user);
+        commit('SET_TOKEN', response.data.token);
+        return response.data;
       } catch (error) {
-        commit('setError', error.response?.data?.message || '로그인 중 오류가 발생했습니다.')
-        throw error
+        commit('SET_ERROR', error.response ? error.response.data.message : error.message);
+        throw error;
       } finally {
-        commit('setLoading', false)
+        commit('SET_LOADING', false);
       }
     },
-    async register({ commit }, userData) {
+    async logout({ commit }) {
       try {
-        commit('setLoading', true)
-        commit('clearError')
-        
-        await api.post('/auth/register', userData)
-      } catch (error) {
-        commit('setError', error.response?.data?.message || '회원가입 중 오류가 발생했습니다.')
-        throw error
+        await api.auth.logout();
       } finally {
-        commit('setLoading', false)
+        commit('SET_USER', null);
+        commit('SET_TOKEN', null);
       }
     },
     
     // 폐기물 요청 관련 액션
-    async fetchWasteRequests({ commit }, params = {}) {
+    async fetchWasteRequests({ commit }, params) {
+      commit('SET_LOADING', true);
+      commit('SET_ERROR', null);
       try {
-        commit('setLoading', true)
-        commit('clearError')
-        
-        const response = await api.get('/waste-requests', { params })
-        commit('setWasteRequests', response.data.requests || response.data)
-        
-        return response.data
+        const response = await api.wasteRequests.getAll(params);
+        commit('SET_WASTE_REQUESTS', response.data);
+        return response.data;
       } catch (error) {
-        commit('setError', error.response?.data?.message || '요청 목록을 불러오는 중 오류가 발생했습니다.')
-        throw error
+        commit('SET_ERROR', error.response ? error.response.data.message : error.message);
+        throw error;
       } finally {
-        commit('setLoading', false)
+        commit('SET_LOADING', false);
       }
     },
-    async fetchWasteRequest({ commit }, id) {
+    async createWasteRequest({ commit }, data) {
+      commit('SET_LOADING', true);
+      commit('SET_ERROR', null);
       try {
-        commit('setLoading', true)
-        commit('clearError')
-        
-        const response = await api.get(`/waste-requests/${id}`)
-        return response.data
+        const response = await api.wasteRequests.create(data);
+        return response.data;
       } catch (error) {
-        commit('setError', error.response?.data?.message || '요청 정보를 불러오는 중 오류가 발생했습니다.')
-        throw error
+        commit('SET_ERROR', error.response ? error.response.data.message : error.message);
+        throw error;
       } finally {
-        commit('setLoading', false)
+        commit('SET_LOADING', false);
       }
     },
-    async createWasteRequest({ commit }, requestData) {
+    async updateWasteRequest({ commit }, { id, data }) {
+      commit('SET_LOADING', true);
+      commit('SET_ERROR', null);
       try {
-        commit('setLoading', true)
-        commit('clearError')
-        
-        const response = await api.post('/waste-requests', requestData)
-        commit('addWasteRequest', response.data.request)
-        
-        return response.data.request
+        const response = await api.wasteRequests.update(id, data);
+        return response.data;
       } catch (error) {
-        commit('setError', error.response?.data?.message || '요청 생성 중 오류가 발생했습니다.')
-        throw error
+        commit('SET_ERROR', error.response ? error.response.data.message : error.message);
+        throw error;
       } finally {
-        commit('setLoading', false)
-      }
-    },
-    async updateWasteRequest({ commit }, { id, updateData }) {
-      try {
-        commit('setLoading', true)
-        commit('clearError')
-        
-        const response = await api.put(`/waste-requests/${id}`, updateData)
-        commit('updateWasteRequest', response.data.request)
-        
-        return response.data.request
-      } catch (error) {
-        commit('setError', error.response?.data?.message || '요청 업데이트 중 오류가 발생했습니다.')
-        throw error
-      } finally {
-        commit('setLoading', false)
+        commit('SET_LOADING', false);
       }
     },
     async deleteWasteRequest({ commit }, id) {
+      commit('SET_LOADING', true);
+      commit('SET_ERROR', null);
       try {
-        commit('setLoading', true)
-        commit('clearError')
-        
-        await api.delete(`/waste-requests/${id}`)
+        const response = await api.wasteRequests.delete(id);
+        return response.data;
       } catch (error) {
-        commit('setError', error.response?.data?.message || '요청 삭제 중 오류가 발생했습니다.')
-        throw error
+        commit('SET_ERROR', error.response ? error.response.data.message : error.message);
+        throw error;
       } finally {
-        commit('setLoading', false)
+        commit('SET_LOADING', false);
+      }
+    },
+    
+    // 사용자 관련 액션
+    async fetchUsers({ commit }, params) {
+      commit('SET_LOADING', true);
+      commit('SET_ERROR', null);
+      try {
+        const response = await api.users.getAll(params);
+        commit('SET_USERS', response.data);
+        return response.data;
+      } catch (error) {
+        commit('SET_ERROR', error.response ? error.response.data.message : error.message);
+        throw error;
+      } finally {
+        commit('SET_LOADING', false);
       }
     },
     
     // 차량 관련 액션
-    async fetchVehicles({ commit }, params = {}) {
+    async fetchVehicles({ commit }, params) {
+      commit('SET_LOADING', true);
+      commit('SET_ERROR', null);
       try {
-        commit('setLoading', true)
-        commit('clearError')
-        
-        const response = await api.get('/vehicles', { params })
-        commit('setVehicles', response.data)
-        
-        return response.data
+        const response = await api.vehicles.getAll(params);
+        commit('SET_VEHICLES', response.data);
+        return response.data;
       } catch (error) {
-        commit('setError', error.response?.data?.message || '차량 목록을 불러오는 중 오류가 발생했습니다.')
-        throw error
+        commit('SET_ERROR', error.response ? error.response.data.message : error.message);
+        throw error;
       } finally {
-        commit('setLoading', false)
-      }
-    },
-    
-    // 기사 관련 액션
-    async fetchDrivers({ commit }) {
-      try {
-        commit('setLoading', true)
-        commit('clearError')
-        
-        const response = await api.get('/auth/users', { params: { role: 'driver' } })
-        commit('setDrivers', response.data)
-        
-        return response.data
-      } catch (error) {
-        commit('setError', error.response?.data?.message || '기사 목록을 불러오는 중 오류가 발생했습니다.')
-        throw error
-      } finally {
-        commit('setLoading', false)
-      }
-    },
-    
-    // 대시보드 관련 액션
-    async fetchDashboardData({ commit }) {
-      try {
-        commit('setLoading', true)
-        commit('clearError')
-        
-        const response = await api.get('/dashboard')
-        commit('setDashboardData', response.data)
-        
-        return response.data
-      } catch (error) {
-        commit('setError', error.response?.data?.message || '대시보드 데이터를 불러오는 중 오류가 발생했습니다.')
-        throw error
-      } finally {
-        commit('setLoading', false)
+        commit('SET_LOADING', false);
       }
     }
+  },
+  getters: {
+    isAuthenticated: state => !!state.token,
+    currentUser: state => state.user,
+    isAdmin: state => state.user && state.user.role === 'admin',
+    isDriver: state => state.user && state.user.role === 'driver'
   }
 })
