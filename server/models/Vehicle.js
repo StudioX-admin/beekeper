@@ -1,71 +1,40 @@
+// server/models/Vehicle.js
 const mongoose = require('mongoose');
 
-const vehicleSchema = new mongoose.Schema({
-  vehicleId: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  type: {
-    type: String,
-    required: true
-  },
-  capacity: {
-    type: Number,
-    required: true,
-    min: 0
-  },
-  status: {
-    type: String,
-    enum: ['available', 'in-use', 'maintenance', 'out-of-service'],
-    default: 'available'
-  },
-  assignedTo: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  },
-  assignedAt: {
-    type: Date
-  },
-  lastMaintenance: {
-    type: Date
-  },
-  maintenanceHistory: [
-    {
-      date: {
-        type: Date
-      },
-      description: {
-        type: String
-      },
-      cost: {
-        type: Number
-      }
+const VehicleSchema = new mongoose.Schema(
+  {
+    plateNumber: {
+      type: String,
+      required: true,
+      unique: true
+    },
+    type: {
+      type: String,
+      required: true
+    },
+    capacity: {
+      type: String,
+      required: true
+    },
+    status: {
+      type: String,
+      enum: ['available', 'assigned', 'maintenance', 'out_of_service'],
+      default: 'available'
+    },
+    currentDriverId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    lastMaintenance: {
+      type: Date
+    },
+    nextMaintenance: {
+      type: Date
     }
-  ],
-  registrationNumber: {
-    type: String
   },
-  manufacturer: {
-    type: String
-  },
-  model: {
-    type: String
-  },
-  year: {
-    type: Number
-  },
-  fuelType: {
-    type: String
-  },
-  nextInspectionDate: {
-    type: Date
-  },
-  notes: {
-    type: String
+  {
+    timestamps: true
   }
-});
+);
 
-const Vehicle = mongoose.model('Vehicle', vehicleSchema);
-
-module.exports = Vehicle;
+module.exports = mongoose.model('Vehicle', VehicleSchema);
