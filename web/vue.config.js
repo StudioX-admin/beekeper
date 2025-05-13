@@ -1,5 +1,21 @@
-
+// web/vue.config.js
 module.exports = {
-  lintOnSave: false,
-  transpileDependencies: true
+  publicPath: process.env.NODE_ENV === 'production' ? '/admin/' : '/',
+  outputDir: 'dist',
+  assetsDir: 'assets',
+  devServer: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true
+      }
+    }
+  },
+  configureWebpack: {
+    optimization: {
+      splitChunks: {
+        chunks: 'all'
+      }
+    }
+  }
 }
