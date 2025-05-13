@@ -1,0 +1,261 @@
+/* web/src/assets/css/responsive.css */
+/* 반응형 디자인 중단점 설정 */
+:root {
+  --breakpoint-xs: 0;
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+  --breakpoint-xxl: 1400px;
+}
+
+/* 콘텐츠 최대 너비 제한 */
+.container {
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: var(--spacing-4);
+  padding-left: var(--spacing-4);
+}
+
+/* 반응형 그리드 시스템 */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: calc(var(--spacing-4) * -1);
+  margin-left: calc(var(--spacing-4) * -1);
+}
+
+.col {
+  position: relative;
+  width: 100%;
+  padding-right: var(--spacing-4);
+  padding-left: var(--spacing-4);
+}
+
+/* XS 기본 스타일 (0 이상) */
+/* 기본값으로 설정 */
+
+/* SM 중단점 (576px 이상) */
+@media (min-width: 576px) {
+  .container {
+    max-width: 540px;
+  }
+  
+  .col-sm-1 { flex: 0 0 8.333333%; max-width: 8.333333%; }
+  .col-sm-2 { flex: 0 0 16.666667%; max-width: 16.666667%; }
+  .col-sm-3 { flex: 0 0 25%; max-width: 25%; }
+  .col-sm-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+  .col-sm-5 { flex: 0 0 41.666667%; max-width: 41.666667%; }
+  .col-sm-6 { flex: 0 0 50%; max-width: 50%; }
+  .col-sm-7 { flex: 0 0 58.333333%; max-width: 58.333333%; }
+  .col-sm-8 { flex: 0 0 66.666667%; max-width: 66.666667%; }
+  .col-sm-9 { flex: 0 0 75%; max-width: 75%; }
+  .col-sm-10 { flex: 0 0 83.333333%; max-width: 83.333333%; }
+  .col-sm-11 { flex: 0 0 91.666667%; max-width: 91.666667%; }
+  .col-sm-12 { flex: 0 0 100%; max-width: 100%; }
+}
+
+/* MD 중단점 (768px 이상) */
+@media (min-width: 768px) {
+  .container {
+    max-width: 720px;
+  }
+  
+  .col-md-1 { flex: 0 0 8.333333%; max-width: 8.333333%; }
+  .col-md-2 { flex: 0 0 16.666667%; max-width: 16.666667%; }
+  .col-md-3 { flex: 0 0 25%; max-width: 25%; }
+  .col-md-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+  .col-md-5 { flex: 0 0 41.666667%; max-width: 41.666667%; }
+  .col-md-6 { flex: 0 0 50%; max-width: 50%; }
+  .col-md-7 { flex: 0 0 58.333333%; max-width: 58.333333%; }
+  .col-md-8 { flex: 0 0 66.666667%; max-width: 66.666667%; }
+  .col-md-9 { flex: 0 0 75%; max-width: 75%; }
+  .col-md-10 { flex: 0 0 83.333333%; max-width: 83.333333%; }
+  .col-md-11 { flex: 0 0 91.666667%; max-width: 91.666667%; }
+  .col-md-12 { flex: 0 0 100%; max-width: 100%; }
+}
+
+/* LG 중단점 (992px 이상) */
+@media (min-width: 992px) {
+  .container {
+    max-width: 960px;
+  }
+  
+  .col-lg-1 { flex: 0 0 8.333333%; max-width: 8.333333%; }
+  .col-lg-2 { flex: 0 0 16.666667%; max-width: 16.666667%; }
+  .col-lg-3 { flex: 0 0 25%; max-width: 25%; }
+  .col-lg-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+  .col-lg-5 { flex: 0 0 41.666667%; max-width: 41.666667%; }
+  .col-lg-6 { flex: 0 0 50%; max-width: 50%; }
+  .col-lg-7 { flex: 0 0 58.333333%; max-width: 58.333333%; }
+  .col-lg-8 { flex: 0 0 66.666667%; max-width: 66.666667%; }
+  .col-lg-9 { flex: 0 0 75%; max-width: 75%; }
+  .col-lg-10 { flex: 0 0 83.333333%; max-width: 83.333333%; }
+  .col-lg-11 { flex: 0 0 91.666667%; max-width: 91.666667%; }
+  .col-lg-12 { flex: 0 0 100%; max-width: 100%; }
+}
+
+/* XL 중단점 (1200px 이상) */
+@media (min-width: 1200px) {
+  .container {
+    max-width: 1140px;
+  }
+  
+  .col-xl-1 { flex: 0 0 8.333333%; max-width: 8.333333%; }
+  .col-xl-2 { flex: 0 0 16.666667%; max-width: 16.666667%; }
+  .col-xl-3 { flex: 0 0 25%; max-width: 25%; }
+  .col-xl-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+  .col-xl-5 { flex: 0 0 41.666667%; max-width: 41.666667%; }
+  .col-xl-6 { flex: 0 0 50%; max-width: 50%; }
+  .col-xl-7 { flex: 0 0 58.333333%; max-width: 58.333333%; }
+  .col-xl-8 { flex: 0 0 66.666667%; max-width: 66.666667%; }
+  .col-xl-9 { flex: 0 0 75%; max-width: 75%; }
+  .col-xl-10 { flex: 0 0 83.333333%; max-width: 83.333333%; }
+  .col-xl-11 { flex: 0 0 91.666667%; max-width: 91.666667%; }
+  .col-xl-12 { flex: 0 0 100%; max-width: 100%; }
+}
+
+/* XXL 중단점 (1400px 이상) */
+@media (min-width: 1400px) {
+  .container {
+    max-width: 1320px;
+  }
+  
+  .col-xxl-1 { flex: 0 0 8.333333%; max-width: 8.333333%; }
+  .col-xxl-2 { flex: 0 0 16.666667%; max-width: 16.666667%; }
+  .col-xxl-3 { flex: 0 0 25%; max-width: 25%; }
+  .col-xxl-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+  .col-xxl-5 { flex: 0 0 41.666667%; max-width: 41.666667%; }
+  .col-xxl-6 { flex: 0 0 50%; max-width: 50%; }
+  .col-xxl-7 { flex: 0 0 58.333333%; max-width: 58.333333%; }
+  .col-xxl-8 { flex: 0 0 66.666667%; max-width: 66.666667%; }
+  .col-xxl-9 { flex: 0 0 75%; max-width: 75%; }
+  .col-xxl-10 { flex: 0 0 83.333333%; max-width: 83.333333%; }
+  .col-xxl-11 { flex: 0 0 91.666667%; max-width: 91.666667%; }
+  .col-xxl-12 { flex: 0 0 100%; max-width: 100%; }
+}
+
+/* 모바일 먼저 접근 방식을 위한 미디어 쿼리 유틸리티 */
+/* 사이드바 토글 등 모바일 레이아웃 처리 */
+.d-none {
+  display: none !important;
+}
+
+.d-block {
+  display: block !important;
+}
+
+.d-flex {
+  display: flex !important;
+}
+
+@media (min-width: 576px) {
+  .d-sm-none {
+    display: none !important;
+  }
+  
+  .d-sm-block {
+    display: block !important;
+  }
+  
+  .d-sm-flex {
+    display: flex !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .d-md-none {
+    display: none !important;
+  }
+  
+  .d-md-block {
+    display: block !important;
+  }
+  
+  .d-md-flex {
+    display: flex !important;
+  }
+}
+
+@media (min-width: 992px) {
+  .d-lg-none {
+    display: none !important;
+  }
+  
+  .d-lg-block {
+    display: block !important;
+  }
+  
+  .d-lg-flex {
+    display: flex !important;
+  }
+  
+  /* 데스크탑에서 사이드바 고정 */
+  .sidebar {
+    transform: translateX(0) !important;
+  }
+  
+  .main-content.with-sidebar {
+    margin-left: var(--sidebar-width) !important;
+  }
+}
+
+@media (min-width: 1200px) {
+  .d-xl-none {
+    display: none !important;
+  }
+  
+  .d-xl-block {
+    display: block !important;
+  }
+  
+  .d-xl-flex {
+    display: flex !important;
+  }
+}
+
+/* 모바일 메뉴 토글 버튼 스타일 */
+.mobile-menu-toggle {
+  display: block;
+  position: fixed;
+  top: 12px;
+  left: 15px;
+  z-index: 1100;
+  width: 40px;
+  height: 40px;
+  background-color: var(--primary-color);
+  border-radius: 50%;
+  border: none;
+  box-shadow: var(--shadow);
+  color: var(--text-light);
+  font-size: var(--text-lg);
+  cursor: pointer;
+  transition: background-color var(--transition-fast) var(--easing-default);
+}
+
+.mobile-menu-toggle:hover {
+  background-color: var(--blue-800);
+}
+
+.mobile-menu-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.mobile-menu-overlay.active {
+  display: block;
+}
+
+@media (min-width: 992px) {
+  .mobile-menu-toggle,
+  .mobile-menu-overlay {
+    display: none !important;
+  }
+}
