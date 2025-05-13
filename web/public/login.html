@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BeeKeper 로그인</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Arial', sans-serif;
       margin: 0;
       padding: 0;
       background-color: #f5f5f5;
@@ -18,7 +19,7 @@
       background: white;
       padding: 2rem;
       border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
       width: 100%;
       max-width: 400px;
     }
@@ -72,12 +73,16 @@
       color: #4CAF50;
       text-decoration: none;
     }
+    .register-link {
+      text-align: center;
+      margin-top: 1rem;
+    }
   </style>
 </head>
 <body>
   <div class="login-container">
     <h1>BeeKeper 로그인</h1>
-    <div id="form">
+    <div id="login-form">
       <div class="form-group">
         <label for="email">이메일</label>
         <input type="email" id="email" required>
@@ -86,63 +91,82 @@
         <label for="password">비밀번호</label>
         <input type="password" id="password" required>
       </div>
-      <button id="login-btn">로그인</button>
-      <p id="message"></p>
-      <p>계정이 없으신가요? <a href="/register">회원가입</a></p>
+      <button id="login-button" type="button">로그인</button>
+      <p id="message" class="error-message" style="display: none;"></p>
+      <p class="register-link">계정이 없으신가요? <a href="register.html">회원가입</a></p>
     </div>
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      const loginBtn = document.getElementById('login-btn');
-      const messageEl = document.getElementById('message');
-      
-      loginBtn.addEventListener('click', async function() {
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        
-        if (!email || !password) {
-          messageEl.textContent = '이메일과 비밀번호를 입력해주세요.';
-          messageEl.className = 'error-message';
+      const loginButton = document.getElementById('login-button');
+      const emailInput = document.getElementById('email');
+      const passwordInput = document.getElementById('password');
+      const messageElement = document.getElementById('message');
+
+      // 로그인 버튼 클릭 이벤트
+      loginButton.addEventListener('click', function() {
+        // 입력값 검증
+        if (!emailInput.value || !passwordInput.value) {
+          showMessage('이메일과 비밀번호를 입력해주세요.', 'error');
           return;
         }
+
+        // 로딩 상태 표시
+        loginButton.disabled = true;
+        loginButton.textContent = '로그인 중...';
         
-        loginBtn.disabled = true;
-        messageEl.textContent = '로그인 중...';
-        messageEl.className = '';
-        
-        try {
-          const response = await fetch('https://beekeper-d0e3.onrender.com/api/auth/login', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email, password })
-          });
-          
-          const data = await response.json();
-          
-          if (response.ok) {
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
-            
-            messageEl.textContent = '로그인 성공! 대시보드로 이동합니다.';
-            messageEl.className = 'success-message';
-            
-            setTimeout(() => {
-              window.location.href = '/';
-            }, 1500);
-          } else {
-            messageEl.textContent = data.message || '로그인에 실패했습니다.';
-            messageEl.className = 'error-message';
-            loginBtn.disabled = false;
+        // 백엔드 API 호출
+        fetch('https://beekeper-d0e3.onrender.com/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            email: emailInput.value,
+            password: passwordInput.value
+          })
+        })
+        .then(response => {
+          if (!response.ok) {
+            return response.json().then(data => {
+              throw new Error(data.message || '로그인에 실패했습니다.');
+            });
           }
-        } catch (error) {
-          messageEl.textContent = '네트워크 오류가 발생했습니다.';
-          messageEl.className = 'error-message';
-          loginBtn.disabled = false;
-        }
+          return response.json();
+        })
+        .then(data => {
+          // 로그인 성공
+          showMessage('로그인 성공! 대시보드로 이동합니다.', 'success');
+          
+          // 토큰 저장
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          
+          // 대시보드로 리디렉션
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 1500);
+        })
+        .catch(error => {
+          // 오류 표시
+          showMessage(error.message, 'error');
+          loginButton.disabled = false;
+          loginButton.textContent = '로그인';
+        });
       });
+
+      // 메시지 표시 함수
+      function showMessage(text, type) {
+        messageElement.textContent = text;
+        messageElement.style.display = 'block';
+        
+        if (type === 'error') {
+          messageElement.className = 'error-message';
+        } else if (type === 'success') {
+          messageElement.className = 'success-message';
+        }
+      }
     });
   </script>
 </body>
