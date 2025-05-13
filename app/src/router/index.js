@@ -1,81 +1,71 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import store from '../store'
+// app/src/router/index.js
+import Vue from 'vue'
+import VueRouter from 'vue-router'
 
-// 페이지 컴포넌트 불러오기
 import Login from '../views/Login.vue'
-import Dashboard from '../views/Dashboard.vue'
-import RequestDetail from '../views/RequestDetail.vue'
-import Completed from '../views/Completed.vue'
+import Tasks from '../views/Tasks.vue'
+import TaskDetail from '../views/TaskDetail.vue'
 import Profile from '../views/Profile.vue'
-import NotFound from '../views/NotFound.vue'
+import History from '../views/History.vue'
+
+Vue.use(VueRouter)
 
 const routes = [
   {
     path: '/',
-    redirect: '/dashboard'
-  },
-  {
-    path: '/login',
-    name: 'Login',
-    component: Login,
-    meta: { requiresAuth: false }
-  },
-  {
-    path: '/dashboard',
-    name: 'Dashboard',
-    component: Dashboard,
+    name: 'tasks',
+    component: Tasks,
     meta: { requiresAuth: true }
   },
   {
-    path: '/request/:id',
-    name: 'RequestDetail',
-    component: RequestDetail,
-    meta: { requiresAuth: true },
-    props: true
+    path: '/login',
+    name: 'login',
+    component: Login,
+    meta: { guest: true }
   },
   {
-    path: '/completed',
-    name: 'Completed',
-    component: Completed,
+    path: '/task/:id',
+    name: 'task-detail',
+    component: TaskDetail,
     meta: { requiresAuth: true }
   },
   {
     path: '/profile',
-    name: 'Profile',
+    name: 'profile',
     component: Profile,
     meta: { requiresAuth: true }
   },
   {
-    path: '/:pathMatch(.*)*',
-    name: 'NotFound',
-    component: NotFound
+    path: '/history',
+    name: 'history',
+    component: History,
+    meta: { requiresAuth: true }
   }
 ]
 
-const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+const router = new VueRouter({
+  mode: 'history',
+  base: process.env.BASE_URL,
   routes
 })
 
-// 네비게이션 가드
+// 인증 가드 설정
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = store.getters.isAuthenticated
-  const userRole = store.getters.user?.role
+  const isAuthenticated = localStorage.getItem('token')
   
-  // 인증이 필요한 페이지 접근 제한
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    next({ name: 'Login' })
-  } 
-  // 인증된 사용자가 로그인 페이지 접근 시 대시보드로 리다이렉트
-  else if (!to.meta.requiresAuth && isAuthenticated && to.name === 'Login') {
-    next({ name: 'Dashboard' })
-  }
-  // 기사가 아닌 사용자에게 앱 접근 제한
-  else if (isAuthenticated && userRole !== 'driver' && to.name !== 'Login') {
-    alert('이 앱은 수거 기사 전용입니다.')
-    next({ name: 'Login' })
-  }
-  else {
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (!isAuthenticated) {
+      next({ name: 'login' })
+    } else {
+      next()
+    }
+  } else if (to.matched.some(record => record.meta.guest)) {
+    if (isAuthenticated) {
+      next({ name: 'tasks' })
+    } else {
+      next()
+    }
+  } else {
     next()
   }
 })
