@@ -1,5 +1,7 @@
 // dotenv 설정 안전하게 로드
 try {
+  // 누락된 dotenv 로드 코드 추가
+  require('dotenv').config();
 } catch (error) {
   console.log('dotenv 모듈을 불러올 수 없습니다. 기본 환경 설정을 사용합니다.');
 }
