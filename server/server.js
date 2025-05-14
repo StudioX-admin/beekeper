@@ -1,8 +1,13 @@
-// dotenv 설정 안전하게 로드
-try {
-  require('dotenv').config();
-} catch (error) {
-  console.log('dotenv 모듈을 불러올 수 없습니다. 기본 환경 설정을 사용합니다.');
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
+
+// 환경 변수 검증
+const requiredEnvVars = ['MONGODB_URI', 'JWT_SECRET'];
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+  console.error('Missing required environment variables:', missingEnvVars.join(', '));
+  process.exit(1);
 }
 
 const express = require('express');
