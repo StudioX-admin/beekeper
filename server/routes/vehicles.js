@@ -1,89 +1,63 @@
+// server/routes/vehicles.js
 const express = require('express');
-const Vehicle = require('../server/models/Vehicle');
-const User = require('../server/models/User');
-const WasteRequest = require('../server/models/WasteRequest');
-const auth = require('../server/middlewares/auth');
-
 const router = express.Router();
+const Vehicle = require('../models/Vehicle');
+const { authenticate, authorize } = require('../middlewares/auth');
 
-// 모든 차량 목록 조회
-router.get('/', auth, async (req, res) => {
+// 모든 차량 조회
+router.get('/', authenticate, async (req, res) => {
   try {
-    const { status, assignedTo } = req.query;
-    const filter = {};
-    
-    if (status) filter.status = status;
-    if (assignedTo) filter.assignedTo = assignedTo;
-    
-    // 기사의 경우 자신에게 할당된 차량만 볼 수 있음
-    if (req.user.role === 'driver') {
-      filter.assignedTo = req.user.id;
-    }
-    
-    const vehicles = await Vehicle.find(filter)
-      .populate('assignedTo', 'name username phone')
-      .sort({ vehicleId: 1 });
+    const vehicles = await Vehicle.find()
+      .populate('currentDriverId', 'name');
     
     res.json(vehicles);
   } catch (error) {
-    res.status(500).json({ message: '서버 오류', error: error.message });
+    console.error('Get all vehicles error:', error);
+    res.status(500).json({ message: '차량 조회 중 오류가 발생했습니다.' });
   }
 });
 
 // 차량 상세 조회
-router.get('/:id', auth, async (req, res) => {
+router.get('/:id', authenticate, async (req, res) => {
   try {
     const vehicle = await Vehicle.findById(req.params.id)
-      .populate('assignedTo', 'name username phone');
+      .populate('currentDriverId', 'name');
     
     if (!vehicle) {
-      return res.status(404).json({ message: '차량을 찾을 수 없습니다.' });
-    }
-    
-    // 기사의 경우 자신에게 할당된 차량만 볼 수 있음
-    if (req.user.role === 'driver' && vehicle.assignedTo?._id.toString() !== req.user.id) {
-      return res.status(403).json({ message: '이 차량에 접근할 권한이 없습니다.' });
+      return res.status(404).json({ message: '해당 차량을 찾을 수 없습니다.' });
     }
     
     res.json(vehicle);
   } catch (error) {
-    res.status(500).json({ message: '서버 오류', error: error.message });
+    console.error('Get vehicle by ID error:', error);
+    res.status(500).json({ message: '차량 조회 중 오류가 발생했습니다.' });
   }
 });
 
-// 새 차량 등록
-router.post('/', auth, async (req, res) => {
+// 차량 생성 (관리자 전용)
+router.post('/', authenticate, authorize(['admin']), async (req, res) => {
   try {
-    // 관리자 권한 확인
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ message: '권한이 없습니다.' });
-    }
+    const { plateNumber, type, capacity, status } = req.body;
     
-    const { vehicleId, type, capacity, registrationNumber, manufacturer, model, year, fuelType } = req.body;
-    
-    // 이미 존재하는 차량인지 확인
-    const existingVehicle = await Vehicle.findOne({ vehicleId });
+    // 중복 차량 번호 확인
+    const existingVehicle = await Vehicle.findOne({ plateNumber });
     if (existingVehicle) {
-      return res.status(400).json({ message: '이미 등록된 차량 ID입니다.' });
+      return res.status(400).json({ message: '이미 존재하는 차량 번호입니다.' });
     }
     
-    const newVehicle = new Vehicle({
-      vehicleId,
+    const vehicle = new Vehicle({
+      plateNumber,
       type,
       capacity,
-      status: 'available',
-      registrationNumber,
-      manufacturer,
-      model,
-      year,
-      fuelType
+      status: status || 'available'
     });
     
-    await newVehicle.save();
+    await vehicle.save();
     
-    res.status(201).json({ message: '차량이 성공적으로 등록되었습니다.', vehicle: newVehicle });
+    res.status(201).json(vehicle);
   } catch (error) {
-    res.status(500).json({ message: '서버 오류', error: error.message });
+    console.error('Create vehicle error:', error);
+    res.status(500).json({ message: '차량 생성 중 오류가 발생했습니다.' });
   }
 });
 
