@@ -1,6 +1,6 @@
 // app/vue.config.js
 module.exports = {
-  publicPath: process.env.NODE_ENV === 'production' ? '/driver/' : '/',
+  publicPath: process.env.NODE_ENV === 'production' ? '/' : '/',
   outputDir: 'dist',
   assetsDir: 'assets',
   devServer: {
@@ -8,20 +8,7 @@ module.exports = {
       '/api': {
         target: 'http://localhost:3000',
         changeOrigin: true
-
-
-
       }
-    }
-  },
-  configureWebpack: {
-    optimization: {
-      splitChunks: {
-        chunks: 'all'
-      }
-
-
-
     }
   }
-}
+};
