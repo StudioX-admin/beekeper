@@ -1,12 +1,12 @@
-// app/vue.config.js
 module.exports = {
-  publicPath: process.env.NODE_ENV === 'production' ? '/' : '/',
+  publicPath: '/',
   outputDir: 'dist',
   assetsDir: 'assets',
+  productionSourceMap: false,
   devServer: {
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'http://localhost:5000',
         changeOrigin: true
       }
     }
