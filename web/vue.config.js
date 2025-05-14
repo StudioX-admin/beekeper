@@ -1,4 +1,3 @@
-// web/vue.config.js
 module.exports = {
   publicPath: '/',
   outputDir: 'dist',
@@ -11,10 +10,9 @@ module.exports = {
         changeOrigin: true
       }
     }
-  }
-};
-    
-    // 퍼블리싱 소스의 이미지 및 아이콘 최적화
+  },
+  
+  // chainWebpack 설정을 module.exports 객체 내부로 이동
   chainWebpack: config => {
     // SVG 로더 설정
     const svgRule = config.module.rule('svg');
@@ -31,7 +29,6 @@ module.exports = {
           ]
         }
       });
-
     // 이미지 최적화 설정
     config.module
       .rule('images')
@@ -59,3 +56,4 @@ module.exports = {
         }
       });
   }
+};
