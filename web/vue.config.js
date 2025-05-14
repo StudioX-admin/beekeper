@@ -34,6 +34,7 @@ module.exports = {
         }
       });
     // 이미지 최적화 설정
+    /*
     config.module
       .rule('images')
       .use('image-webpack-loader')
@@ -59,7 +60,7 @@ module.exports = {
           quality: 75
         }
       });
-
+    */
       // 경로 별칭 추가
     config.resolve.alias.set('@', require('path').join(__dirname, 'src'));
   },
