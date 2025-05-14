@@ -1,5 +1,5 @@
 /* web/src/assets/css/global.css */
-@import '../scss/variables.scss';
+/* @import '../scss/variables.scss'; */
 @import './fonts.css';
 
 /* 기본 스타일 초기화 */
@@ -68,6 +68,14 @@ img {
   max-width: 100%;
   height: auto;
 }
+
+/* 글로벌 CSS 변수 정의 */
+:root {
+  --primary-color: #1e3a8a;
+  --secondary-color: #4b5563;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --danger-color: #ef4444;
 
 /* 레이아웃 */
 .container {
