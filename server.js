@@ -29,9 +29,13 @@ app.use(express.json());
 
 // MongoDB 연결
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://your-mongodb-uri';
-mongoose.connect(MONGODB_URI)
-  .then(() => console.log('MongoDB 연결 성공'))
-  .catch(err => console.error('MongoDB 연결 오류:', err));
+mongoose.set('strictQuery', true);
+mongoose.connect(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log('MongoDB 연결 성공'))
+.catch(err => console.error('MongoDB 연결 실패:', err));
 
 // 사용자 모델
 const userSchema = new mongoose.Schema({
