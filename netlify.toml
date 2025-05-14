@@ -6,7 +6,7 @@
 [build.environment]
   NODE_VERSION = "18"
   NODE_OPTIONS = "--openssl-legacy-provider"
-  NPM_VERSION = "9"
+  VUE_APP_API_URL = "https://beekeper-d0e3.onrender.com/api"
 
 [[redirects]]
   from = "/*"
