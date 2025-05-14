@@ -1,12 +1,12 @@
 // web/vue.config.js
 module.exports = {
-  publicPath: process.env.NODE_ENV === 'production' ? '/admin/' : '/',
+  publicPath: process.env.NODE_ENV === 'production' ? '/' : '/',
   outputDir: 'dist',
   assetsDir: 'assets',
   devServer: {
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: process.env.VUE_APP_API_URL || 'http://localhost:3000',
         changeOrigin: true
       }
     }
@@ -18,6 +18,7 @@ module.exports = {
       }
     }
   }
+}
     
     // 퍼블리싱 소스의 이미지 및 아이콘 최적화
   chainWebpack: config => {
