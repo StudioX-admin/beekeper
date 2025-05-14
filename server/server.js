@@ -1,34 +1,28 @@
-require('dotenv').config();
+// dotenv 모듈 없을 때 안전하게 처리
+try {
+  require('dotenv').config();
+} catch (error) {
+  console.log('dotenv 모듈을 불러올 수 없습니다. 기본 환경 설정을 사용합니다.');
+  // 기본 환경 변수 설정
+  process.env.PORT = process.env.PORT || 3000;
+  process.env.MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/beekeper';
+}
+
 const express = require('express');
 const cors = require('cors');
-const morgan = require('morgan');
-const path = require('path');
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // 미들웨어
 app.use(cors());
-app.use(morgan('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// 정적 파일 제공
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../web/dist')));
-}
 
 // 기본 라우트
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'OK', message: 'Server is running' });
-});
-
-// 모든 다른 요청은 SPA로 라우팅
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../web/dist/index.html'));
+app.get('/', (req, res) => {
+  res.json({ message: 'Beekeper API 서버 실행 중' });
 });
 
 // 서버 시작
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`서버가 포트 ${PORT}에서 실행 중입니다.`);
 });
