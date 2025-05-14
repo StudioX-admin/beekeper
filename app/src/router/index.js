@@ -2,19 +2,20 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
+// 페이지 컴포넌트 (실제 파일 경로에 맞게 수정)
 import Login from '../views/Login.vue'
-import Tasks from '../views/Tasks.vue'
-import TaskDetail from '../views/TaskDetail.vue'
+import Dashboard from '../views/Dashboard.vue'
+import RequestDetail from '../views/RequestDetail.vue'
 import Profile from '../views/Profile.vue'
-import History from '../views/History.vue'
+import Completed from '../views/Completed.vue'
 
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: '/',
-    name: 'tasks',
-    component: Tasks,
+    name: 'dashboard',
+    component: Dashboard,
     meta: { requiresAuth: true }
   },
   {
@@ -24,9 +25,9 @@ const routes = [
     meta: { guest: true }
   },
   {
-    path: '/task/:id',
-    name: 'task-detail',
-    component: TaskDetail,
+    path: '/request/:id',
+    name: 'request-detail',
+    component: RequestDetail,
     meta: { requiresAuth: true }
   },
   {
@@ -36,9 +37,9 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/history',
-    name: 'history',
-    component: History,
+    path: '/completed',
+    name: 'completed',
+    component: Completed,
     meta: { requiresAuth: true }
   }
 ]
