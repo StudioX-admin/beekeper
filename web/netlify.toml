@@ -1,6 +1,6 @@
 [build]
-  base = "/web"
-  command = "npm install node-sass sass-loader --save-dev && npm run build"
+  base = "."
+  command = "npm install image-webpack-loader webpack@4 @babel/core @babel/eslint-parser --save-dev && sed -i 's|// web/src/assets/scss/variables.scss|/* CSS 변수 파일 임포트 */|g' src/assets/css/global.css && npm run build"
   publish = "dist"
 
 [build.environment]
