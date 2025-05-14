@@ -33,34 +33,7 @@ module.exports = {
           ]
         }
       });
-    // 이미지 최적화 설정
-    /*
-    config.module
-      .rule('images')
-      .use('image-webpack-loader')
-      .loader('image-webpack-loader')
-      .options({
-        bypassOnDebug: true,
-        disable: process.env.NODE_ENV !== 'production',
-        mozjpeg: {
-          progressive: true,
-          quality: 75
-        },
-        optipng: {
-          enabled: true,
-        },
-        pngquant: {
-          quality: [0.65, 0.90],
-          speed: 4
-        },
-        gifsicle: {
-          interlaced: false,
-        },
-        webp: {
-          quality: 75
-        }
-      });
-    */
+
       // 경로 별칭 추가
     config.resolve.alias.set('@', require('path').join(__dirname, 'src'));
   },
