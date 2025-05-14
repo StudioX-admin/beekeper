@@ -1,172 +1,84 @@
-// web/src/store/index.js
 import Vue from 'vue'
 import Vuex from 'vuex'
-import api from '@/api'
+import api from '../api'
+import createPersistedState from 'vuex-persistedstate'
 
 Vue.use(Vuex)
 
+// 모듈 가져오기
+import auth from './modules/auth'
+import wasteRequests from './modules/wasteRequests'
+import vehicles from './modules/vehicles'
+import drivers from './modules/drivers'
+
 export default new Vuex.Store({
+  modules: {
+    auth,
+    wasteRequests,
+    vehicles,
+    drivers
+  },
   state: {
-    user: null,
-    token: localStorage.getItem('token') || null,
-    wasteRequests: [],
-    pagination: {
-      total: 0,
-      page: 1,
-      limit: 10,
-      pages: 0
-    },
-    users: [],
-    vehicles: [],
     loading: false,
-    error: null
+    error: null,
+    systemNotifications: []
+  },
+  getters: {
+    isLoading: state => state.loading,
+    error: state => state.error,
+    systemNotifications: state => state.systemNotifications
   },
   mutations: {
-    SET_USER(state, user) {
-      state.user = user;
-    },
-    SET_TOKEN(state, token) {
-      state.token = token;
-      if (token) {
-        localStorage.setItem('token', token);
-      } else {
-        localStorage.removeItem('token');
-      }
-    },
-    SET_WASTE_REQUESTS(state, { wasteRequests, pagination }) {
-      state.wasteRequests = wasteRequests;
-      state.pagination = pagination;
-    },
-    SET_USERS(state, users) {
-      state.users = users;
-    },
-    SET_VEHICLES(state, vehicles) {
-      state.vehicles = vehicles;
-    },
-    SET_LOADING(state, loading) {
-      state.loading = loading;
+    SET_LOADING(state, status) {
+      state.loading = status
     },
     SET_ERROR(state, error) {
-      state.error = error;
+      state.error = error
+    },
+    CLEAR_ERROR(state) {
+      state.error = null
+    },
+    ADD_NOTIFICATION(state, notification) {
+      state.systemNotifications.push({
+        ...notification,
+        id: Date.now(),
+        read: false
+      })
+    },
+    MARK_NOTIFICATION_READ(state, id) {
+      const index = state.systemNotifications.findIndex(n => n.id === id)
+      if (index !== -1) {
+        state.systemNotifications[index].read = true
+      }
+    },
+    CLEAR_NOTIFICATIONS(state) {
+      state.systemNotifications = []
     }
   },
   actions: {
-    // 인증 관련 액션
-    async login({ commit }, credentials) {
-      commit('SET_LOADING', true);
-      commit('SET_ERROR', null);
-      try {
-        const response = await api.auth.login(credentials);
-        commit('SET_USER', response.data.user);
-        commit('SET_TOKEN', response.data.token);
-        return response.data;
-      } catch (error) {
-        commit('SET_ERROR', error.response ? error.response.data.message : error.message);
-        throw error;
-      } finally {
-        commit('SET_LOADING', false);
-      }
+    setLoading({ commit }, status) {
+      commit('SET_LOADING', status)
     },
-    async logout({ commit }) {
-      try {
-        await api.auth.logout();
-      } finally {
-        commit('SET_USER', null);
-        commit('SET_TOKEN', null);
-      }
+    setError({ commit }, error) {
+      commit('SET_ERROR', error)
     },
-    
-    // 폐기물 요청 관련 액션
-    async fetchWasteRequests({ commit }, params) {
-      commit('SET_LOADING', true);
-      commit('SET_ERROR', null);
-      try {
-        const response = await api.wasteRequests.getAll(params);
-        commit('SET_WASTE_REQUESTS', response.data);
-        return response.data;
-      } catch (error) {
-        commit('SET_ERROR', error.response ? error.response.data.message : error.message);
-        throw error;
-      } finally {
-        commit('SET_LOADING', false);
-      }
+    clearError({ commit }) {
+      commit('CLEAR_ERROR')
     },
-    async createWasteRequest({ commit }, data) {
-      commit('SET_LOADING', true);
-      commit('SET_ERROR', null);
-      try {
-        const response = await api.wasteRequests.create(data);
-        return response.data;
-      } catch (error) {
-        commit('SET_ERROR', error.response ? error.response.data.message : error.message);
-        throw error;
-      } finally {
-        commit('SET_LOADING', false);
-      }
+    addNotification({ commit }, notification) {
+      commit('ADD_NOTIFICATION', notification)
     },
-    async updateWasteRequest({ commit }, { id, data }) {
-      commit('SET_LOADING', true);
-      commit('SET_ERROR', null);
-      try {
-        const response = await api.wasteRequests.update(id, data);
-        return response.data;
-      } catch (error) {
-        commit('SET_ERROR', error.response ? error.response.data.message : error.message);
-        throw error;
-      } finally {
-        commit('SET_LOADING', false);
-      }
+    markNotificationRead({ commit }, id) {
+      commit('MARK_NOTIFICATION_READ', id)
     },
-    async deleteWasteRequest({ commit }, id) {
-      commit('SET_LOADING', true);
-      commit('SET_ERROR', null);
-      try {
-        const response = await api.wasteRequests.delete(id);
-        return response.data;
-      } catch (error) {
-        commit('SET_ERROR', error.response ? error.response.data.message : error.message);
-        throw error;
-      } finally {
-        commit('SET_LOADING', false);
-      }
-    },
-    
-    // 사용자 관련 액션
-    async fetchUsers({ commit }, params) {
-      commit('SET_LOADING', true);
-      commit('SET_ERROR', null);
-      try {
-        const response = await api.users.getAll(params);
-        commit('SET_USERS', response.data);
-        return response.data;
-      } catch (error) {
-        commit('SET_ERROR', error.response ? error.response.data.message : error.message);
-        throw error;
-      } finally {
-        commit('SET_LOADING', false);
-      }
-    },
-    
-    // 차량 관련 액션
-    async fetchVehicles({ commit }, params) {
-      commit('SET_LOADING', true);
-      commit('SET_ERROR', null);
-      try {
-        const response = await api.vehicles.getAll(params);
-        commit('SET_VEHICLES', response.data);
-        return response.data;
-      } catch (error) {
-        commit('SET_ERROR', error.response ? error.response.data.message : error.message);
-        throw error;
-      } finally {
-        commit('SET_LOADING', false);
-      }
+    clearNotifications({ commit }) {
+      commit('CLEAR_NOTIFICATIONS')
     }
   },
-  getters: {
-    isAuthenticated: state => !!state.token,
-    currentUser: state => state.user,
-    isAdmin: state => state.user && state.user.role === 'admin',
-    isDriver: state => state.user && state.user.role === 'driver'
-  }
+  plugins: [
+    createPersistedState({
+      key: 'beekeper-admin',
+      paths: ['auth.token', 'auth.user', 'systemNotifications']
+    })
+  ]
 })
