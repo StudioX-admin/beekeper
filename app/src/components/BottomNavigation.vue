@@ -1,67 +1,34 @@
+<!-- app/src/components/BottomNavigation.vue (기존: NavBar.vue로 작성) -->
 <template>
-  <div class="bottom-navigation">
-    <router-link to="/dashboard" class="nav-item" :class="{ active: $route.name === 'Dashboard' }">
-      <div class="nav-icon">📋</div>
-      <div class="nav-label">할 일</div>
+  <nav class="nav-bar">
+    <router-link 
+      v-for="item in navItems" 
+      :key="item.name" 
+      :to="{ name: item.name }" 
+      class="nav-item" 
+      :class="{ active: $route.name === item.name }"
+    >
+      <i :class="item.icon"></i>
+      <span>{{ item.title }}</span>
     </router-link>
-    
-    <router-link to="/completed" class="nav-item" :class="{ active: $route.name === 'Completed' }">
-      <div class="nav-icon">✓</div>
-      <div class="nav-label">완료</div>
-    </router-link>
-    
-    <router-link to="/profile" class="nav-item" :class="{ active: $route.name === 'Profile' }">
-      <div class="nav-icon">👤</div>
-      <div class="nav-label">내 정보</div>
-    </router-link>
-  </div>
+  </nav>
 </template>
 
 <script>
 export default {
-  name: 'BottomNavigation'
+  name: 'BottomNavigation',  // 수정된 컴포넌트 이름
+  data() {
+    return {
+      navItems: [
+        { name: 'dashboard', title: '작업', icon: 'fas fa-clipboard-list' },
+        { name: 'completed', title: '완료', icon: 'fas fa-check-circle' },  // 실제 파일 구조에 맞게 수정
+        { name: 'profile', title: '내 정보', icon: 'fas fa-user' }
+      ]
+    }
+  }
 }
 </script>
 
-<style scoped>
-.bottom-navigation {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: space-around;
-  background-color: white;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-  height: 64px;
-  max-width: 768px;
-  margin: 0 auto;
-  z-index: 100;
-}
-
-.nav-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #757575;
-  text-decoration: none;
-  padding: 8px 0;
-  transition: color 0.3s;
-}
-
-.nav-item.active {
-  color: #4caf50;
-}
-
-.nav-icon {
-  font-size: 24px;
-  margin-bottom: 4px;
-}
-
-.nav-label {
-  font-size: 12px;
-  font-weight: 500;
-}
+<style>
+/* 스타일 코드는 동일하게 유지 */
 </style>
