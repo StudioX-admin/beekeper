@@ -1,6 +1,6 @@
 // web/src/main.js에 스타일 임포트 추가
 import Vue from 'vue'
-import App from './App.vue'
+import App from './components/App.vue'  // 수정된 경로
 import router from './router'
 import store from './store'
 
@@ -11,15 +11,20 @@ import './assets/css/fonts.css'
 import './assets/css/global.css'
 import './assets/css/responsive.css'
 import './assets/css/animations.css'
+import './assets/css/main.css'
 
 // 전역 컴포넌트 등록
 import Modal from './components/common/Modal.vue'
 import Confirm from './components/common/Confirm.vue'
 import Toast from './components/common/Toast.vue'
+import Header from './components/Header.vue'
+import Sidebar from './components/Sidebar.vue'
 
 Vue.component('Modal', Modal)
 Vue.component('Confirm', Confirm)
 Vue.component('Toast', Toast)
+Vue.component('Header', Header)
+Vue.component('Sidebar', Sidebar)
 
 // 토스트 플러그인 생성
 const ToastPlugin = {
