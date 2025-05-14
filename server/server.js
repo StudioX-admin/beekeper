@@ -1,18 +1,34 @@
-// server/server.js
-const app = require('./app');
-const { PORT } = require('./config');
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const morgan = require('morgan');
+const path = require('path');
 
-const server = app.listen(PORT, () => {
-  console.log(`서버가 포트 ${PORT}에서 실행 중입니다.`);
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// 미들웨어
+app.use(cors());
+app.use(morgan('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// 정적 파일 제공
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../web/dist')));
+}
+
+// 기본 라우트
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'OK', message: 'Server is running' });
 });
 
-// 정상적인 종료 처리
-process.on('SIGTERM', () => {
-  console.log('SIGTERM 신호를 받았습니다. 서버를 종료합니다.');
-  server.close(() => {
-    console.log('프로세스를 종료합니다.');
-    process.exit(0);
-  });
+// 모든 다른 요청은 SPA로 라우팅
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../web/dist/index.html'));
 });
 
-module.exports = server;
+// 서버 시작
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
