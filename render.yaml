@@ -1,10 +1,10 @@
 # Render 배포 명세 파일 (Blueprint)
 services:
   - type: web
-    name: beekeper-api
+    name: beekeper-server
     env: node
-    buildCommand: cd server && npm install
-    startCommand: cd server && node server.js
+    buildCommand: npm install && cd server && npm install
+    startCommand: cd server && npm start
     envVars:
       - key: NODE_ENV
         value: production
