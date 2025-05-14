@@ -128,7 +128,7 @@ export default {
   justify-content: center;
   padding: 2rem;
   background-color: var(--bg-secondary);
-  background-image: url(~@/assets/images/login-bg.jpg);
+  background-image: url('~@/assets/images/login-bg.jpg');
   background-size: cover;
   background-position: center;
   position: relative;
