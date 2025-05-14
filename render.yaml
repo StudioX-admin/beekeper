@@ -1,13 +1,15 @@
 # Render 배포 명세 파일 (Blueprint)
 services:
   - type: web
-    name: beekeper-server
+    name: beekeper
     env: node
-    buildCommand: npm install && cd server && npm install
+    buildCommand: cd server && npm install
     startCommand: cd server && npm start
     envVars:
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: 10000
       - key: MONGODB_URI
         value: your-mongodb-uri
       - key: JWT_SECRET
