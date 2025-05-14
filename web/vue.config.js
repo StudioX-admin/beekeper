@@ -2,7 +2,7 @@
 module.exports = {
   publicPath: '/',
   outputDir: 'dist',
-  productionSourceMap: false,
+  assetsDir: 'assets',
   devServer: {
     proxy: {
       '/api': {
@@ -11,7 +11,7 @@ module.exports = {
       }
     }
   }
-}
+};
     
     // 퍼블리싱 소스의 이미지 및 아이콘 최적화
   chainWebpack: config => {
