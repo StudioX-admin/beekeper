@@ -1,20 +1,13 @@
 // web/vue.config.js
 module.exports = {
-  publicPath: process.env.NODE_ENV === 'production' ? '/' : '/',
+  publicPath: '/',
   outputDir: 'dist',
-  assetsDir: 'assets',
+  productionSourceMap: false,
   devServer: {
     proxy: {
       '/api': {
-        target: process.env.VUE_APP_API_URL || 'http://localhost:3000',
+        target: 'http://localhost:3000',
         changeOrigin: true
-      }
-    }
-  },
-  configureWebpack: {
-    optimization: {
-      splitChunks: {
-        chunks: 'all'
       }
     }
   }
