@@ -1,18 +1,16 @@
-// web/src/router/index.js
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import store from '../store'
 
-// 페이지 컴포넌트 (실제 파일 경로에 맞게 수정)
+// 페이지 컴포넌트 
 import Dashboard from '../views/Dashboard.vue'
 import Login from '../views/Login.vue'
 import WasteRequests from '../views/WasteRequests.vue'
 import WasteRequestDetail from '../views/WasteRequestDetail.vue'
-import DriverManagement from '../views/DriverManagement.vue'
 import VehicleManagement from '../views/VehicleManagement.vue'
+import DriverManagement from '../views/DriverManagement.vue'
 import Settings from '../views/Settings.vue'
-import Register from '../views/Register.vue'
 import NotFound from '../views/NotFound.vue'
-import CreateWasteRequest from '../views/CreateWasteRequest.vue'
 
 Vue.use(VueRouter)
 
@@ -21,80 +19,84 @@ const routes = [
     path: '/',
     name: 'dashboard',
     component: Dashboard,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, title: '대시보드' }
   },
   {
     path: '/login',
     name: 'login',
     component: Login,
-    meta: { guest: true }
-  },
-  {
-    path: '/register',
-    name: 'register',
-    component: Register,
-    meta: { guest: true }
+    meta: { guest: true, title: '로그인' }
   },
   {
     path: '/waste-requests',
     name: 'waste-requests',
     component: WasteRequests,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, title: '폐기물 요청 목록' }
   },
   {
     path: '/waste-requests/:id',
     name: 'waste-request-detail',
     component: WasteRequestDetail,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, title: '폐기물 요청 상세' },
+    props: true
   },
   {
-    path: '/create-waste-request',
-    name: 'create-waste-request',
-    component: CreateWasteRequest,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/driver-management',
-    name: 'driver-management',
-    component: DriverManagement,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/vehicle-management',
+    path: '/vehicles',
     name: 'vehicle-management',
     component: VehicleManagement,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, title: '차량 관리' }
+  },
+  {
+    path: '/drivers',
+    name: 'driver-management',
+    component: DriverManagement,
+    meta: { requiresAuth: true, title: '기사 관리' }
   },
   {
     path: '/settings',
     name: 'settings',
     component: Settings,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, title: '설정' }
   },
   {
     path: '*',
-    name: 'not-found',
-    component: NotFound
+    component: NotFound,
+    meta: { title: '페이지를 찾을 수 없음' }
   }
 ]
 
 const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
-  routes
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    } else {
+      return { x: 0, y: 0 }
+    }
+  }
 })
 
-// 인증 가드 설정
+// 전역 네비게이션 가드
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = localStorage.getItem('token')
+  // 페이지 제목 설정
+  document.title = to.meta.title ? `${to.meta.title} - Beekeper` : 'Beekeper'
+  
+  const isAuthenticated = store.getters.isAuthenticated
   
   if (to.matched.some(record => record.meta.requiresAuth)) {
+    // 인증이 필요한 라우트
     if (!isAuthenticated) {
-      next({ name: 'login' })
+      next({
+        name: 'login',
+        query: { redirect: to.fullPath }
+      })
     } else {
       next()
     }
   } else if (to.matched.some(record => record.meta.guest)) {
+    // 게스트 전용 라우트 (로그인 등)
     if (isAuthenticated) {
       next({ name: 'dashboard' })
     } else {
