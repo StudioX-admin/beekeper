@@ -1,13 +1,11 @@
 [build]
-  base = ""
-  publish = "web/dist"
-  command = "cd web && npm install && npm run build"
+  base = "web"
+  publish = "dist"
+  command = "npm install && npm run build"
 
-[context.production]
-  environment = { NODE_VERSION = "16", NPM_VERSION = "8" }
-
-[context.deploy-preview]
-  environment = { NODE_VERSION = "16", NPM_VERSION = "8" }
+[build.environment]
+  NODE_VERSION = "16"
+  NPM_VERSION = "8"
 
 [[redirects]]
   from = "/*"
