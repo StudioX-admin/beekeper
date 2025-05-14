@@ -6,6 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
+    "fix-css": "mkdir -p src/assets/css && echo '/* CSS 변수 파일 임포트 */\\n@import \"./variables.css\";\\n\\n/* 기본 스타일 */\\nbody {\\n  margin: 0;\\n  padding: 0;\\n  font-family: \"Noto Sans KR\", sans-serif;\\n  color: var(--text-primary);\\n  background-color: var(--bg-primary);\\n}' > src/assets/css/global.css && echo '/* 글로벌 CSS 변수 */\\n:root {\\n  --primary-color: #1e3a8a;\\n  --secondary-color: #4b5563;\\n  --accent-color: #3b82f6;\\n  --bg-primary: #ffffff;\\n  --bg-secondary: #f3f4f6;\\n  --bg-tertiary: #f9fafb;\\n  --text-primary: #111827;\\n  --text-secondary: #4b5563;\\n  --text-tertiary: #9ca3af;\\n  --border-color: #e5e7eb;\\n  --border-radius: 0.375rem;\\n}' > src/assets/css/variables.css"
   },
   "dependencies": {
     "axios": "^0.27.2",
