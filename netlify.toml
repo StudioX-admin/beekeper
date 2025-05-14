@@ -1,6 +1,6 @@
 [build]
   base = "web"
-  command = "npm install webpack@4 webpack-cli@4 @babel/core @babel/eslint-parser --save-dev && sed -i 's/--primary-color: #1e3a8a;/--primary-color: #1e3a8a;}/g' src/assets/css/global.css && npm run build"
+  command = "npm install webpack@4 webpack-cli@4 @babel/core @babel/eslint-parser --save-dev && rm -f src/assets/css/global.css src/assets/css/variables.css && npm run fix-css && npm run build"
   publish = "dist"
 
 [build.environment]
