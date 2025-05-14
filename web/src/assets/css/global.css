@@ -1,5 +1,5 @@
 /* web/src/assets/css/global.css */
-/* @import '../scss/variables.scss'; */
+@import './variables.css';
 @import './fonts.css';
 
 /* 기본 스타일 초기화 */
