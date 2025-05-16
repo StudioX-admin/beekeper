@@ -1,14 +1,6 @@
 [build]
   base = "web"
-  command = """
-    npm install && 
-    mkdir -p src/assets/css && 
-    echo "/* CSS 변수 파일 임포트 */" > src/assets/css/global.css && 
-    echo "@import './variables.css';" >> src/assets/css/global.css && 
-    echo "body { margin: 0; padding: 0; }" >> src/assets/css/global.css && 
-    echo ":root { --primary-color: #1e3a8a; }" > src/assets/css/variables.css && 
-    npm run build
-  """
+  command = "npm install && npm run build"
   publish = "dist"
   
 [build.environment]
