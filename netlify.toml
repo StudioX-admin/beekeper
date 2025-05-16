@@ -1,7 +1,16 @@
 [build]
   base = "web"
-  command = "npm install webpack@4 webpack-cli@4 @babel/core @babel/eslint-parser --save-dev && mkdir -p src/assets/css && echo '/* CSS 변수 파일 임포트 */' > src/assets/css/global.css && echo '@import \"./variables.css\";' >> src/assets/css/global.css && echo 'body { margin: 0; padding: 0; }' >> src/assets/css/global.css && echo ':root { --primary-color: #1e3a8a; }' > src/assets/css/variables.css && npm run build"  publish = "dist"
-
+  command = """
+    npm install && 
+    mkdir -p src/assets/css && 
+    echo "/* CSS 변수 파일 임포트 */" > src/assets/css/global.css && 
+    echo "@import './variables.css';" >> src/assets/css/global.css && 
+    echo "body { margin: 0; padding: 0; }" >> src/assets/css/global.css && 
+    echo ":root { --primary-color: #1e3a8a; }" > src/assets/css/variables.css && 
+    npm run build
+  """
+  publish = "dist"
+  
 [build.environment]
   NODE_VERSION = "18"
   NODE_OPTIONS = "--openssl-legacy-provider"
