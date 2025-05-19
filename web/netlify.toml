@@ -1,25 +1,24 @@
 [build]
-  command = "npm install --legacy-peer-deps && npm run build"
-  publish = "dist"
   base = "web"
+  command = "npm install && npm run build"
+  publish = "dist"
+  environment = { NODE_VERSION = "18.19.0" }
 
 [build.environment]
-  NODE_VERSION = "18.12.0"
-  NPM_FLAGS = "--legacy-peer-deps"
-  VUE_APP_API_URL = "https://beekeeper-api.onrender.com/api"
+  NODE_ENV = "production"
   VUE_APP_ENV = "production"
   VUE_APP_DEBUG = "false"
-
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Content-Security-Policy = "default-src 'self' https: 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: https:; font-src 'self' data: https:;"
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
-  status = 200 
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self' https: 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: https:; font-src 'self' data: https:;"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block" 
