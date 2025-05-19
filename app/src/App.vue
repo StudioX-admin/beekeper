@@ -4,7 +4,9 @@ import { RouterView } from 'vue-router'
 </script>
 
 <template>
-  <RouterView />
+  <div id="app">
+    <router-view />
+  </div>
 </template>
 
 <style>
@@ -18,6 +20,8 @@ import { RouterView } from 'vue-router'
   -moz-osx-font-smoothing: grayscale;
   color: #200C05;
   min-height: 100vh;
+  width: 100%;
+  height: 100%;
 }
 
 body {
