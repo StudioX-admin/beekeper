@@ -6,6 +6,8 @@ import Pages from 'vite-plugin-pages'
 import Layouts from 'vite-plugin-vue-layouts'
 // https://vitejs.dev/config/
 export default defineConfig({
+  root: './',
+  publicDir: 'public',
   plugins: [
     vue(),
     Pages({
@@ -30,6 +32,9 @@ export default defineConfig({
     assetsDir: 'assets',
     sourcemap: false,
     rollupOptions: {
+      input: {
+        main: fileURLToPath(new URL('./index.html', import.meta.url))
+      },
       output: {
         manualChunks: {
           'vendor': ['vue', 'vue-router', 'pinia', 'vuex'],
