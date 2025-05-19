@@ -1,71 +1,25 @@
 // app/src/router/index.js
-import Vue from 'vue'
-import VueRouter from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
+import { setupLayouts } from "layouts-generated"
+import routes from "~pages"
+import { useAuth } from '@/composables/useAuth'
 
-// 페이지 컴포넌트 (실제 파일 경로에 맞게 수정)
-import Login from '../views/Login.vue'
-import Dashboard from '../views/Dashboard.vue'
-import RequestDetail from '../views/RequestDetail.vue'
-import Profile from '../views/Profile.vue'
-import Completed from '../views/Completed.vue'
-
-Vue.use(VueRouter)
-
-const routes = [
-  {
-    path: '/',
-    name: 'dashboard',
-    component: Dashboard,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/login',
-    name: 'login',
-    component: Login,
-    meta: { guest: true }
-  },
-  {
-    path: '/request/:id',
-    name: 'request-detail',
-    component: RequestDetail,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/profile',
-    name: 'profile',
-    component: Profile,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/completed',
-    name: 'completed',
-    component: Completed,
-    meta: { requiresAuth: true }
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes: setupLayouts(routes),
+  scrollBehavior(to, from, savedPosition) {
+    return { top: 0 }
   }
-]
-
-const router = new VueRouter({
-  mode: 'history',
-  base: process.env.BASE_URL,
-  routes
 })
 
-// 인증 가드 설정
+// 네비게이션 가드
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = localStorage.getItem('token')
+  const { user } = useAuth()
   
-  if (to.matched.some(record => record.meta.requiresAuth)) {
-    if (!isAuthenticated) {
-      next({ name: 'login' })
-    } else {
-      next()
-    }
-  } else if (to.matched.some(record => record.meta.guest)) {
-    if (isAuthenticated) {
-      next({ name: 'tasks' })
-    } else {
-      next()
-    }
+  if (to.meta.requiresAuth && !user.value) {
+    next('/login')
+  } else if (to.meta.requiresAdmin && user.value?.role !== 'ADMIN') {
+    next('/home')
   } else {
     next()
   }

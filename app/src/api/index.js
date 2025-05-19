@@ -1,7 +1,9 @@
 // app/src/api/index.js
 import axios from 'axios';
 
-const API_URL = process.env.VUE_APP_API_URL || 'http://localhost:3000/api';
+const API_URL = process.env.NODE_ENV === 'production'
+  ? '/api'
+  : 'http://localhost:3000/api';
 
 // axios 인스턴스 생성
 const api = axios.create({
@@ -26,9 +28,8 @@ api.interceptors.request.use(
 // 응답 인터셉터 - 인증 오류 처리
 api.interceptors.response.use(
   response => response,
-  error => {
-    if (error.response && error.response.status === 401) {
-      // 토큰이 만료되었거나 유효하지 않은 경우 로그인 페이지로 리다이렉트
+  async error => {
+    if (error.response?.status === 401) {
       localStorage.removeItem('token');
       window.location.href = '/login';
     }
@@ -36,12 +37,18 @@ api.interceptors.response.use(
   }
 );
 
+// 인증 관련 API
 export const auth = {
-  login: credentials => api.post('/auth/login', credentials),
-  logout: () => api.post('/auth/logout')
+  login: (credentials) => api.post('/auth/login', credentials),
+  register: (userData) => api.post('/auth/register', userData),
+  logout: () => api.post('/auth/logout'),
+  getMe: () => api.get('/auth/me')
 };
 
+// 기사 전용 API
 export const driver = {
+  getRequests: () => api.get('/driver/requests'),
+  updateRequestStatus: (id, status) => api.put(`/driver/requests/${id}/status`, { status }),
   getTasks: params => api.get('/driver/tasks', { params }),
   getProfile: () => api.get('/driver/profile'),
   updateProfile: data => api.put('/driver/profile', data),
@@ -54,7 +61,41 @@ export const driver = {
   })
 };
 
-export default {
-  auth,
-  driver
+// 폐기물 수거 요청 관련 API
+export const wasteRequests = {
+  getAll: () => api.get('/waste-requests'),
+  get: (id) => api.get(`/waste-requests/${id}`),
+  create: (data) => {
+    const formData = new FormData();
+    Object.keys(data).forEach(key => {
+      if (key === 'image' && data[key]) {
+        formData.append(key, data[key]);
+      } else {
+        formData.append(key, data[key]);
+      }
+    });
+    return api.post('/waste-requests', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  },
+  update: (id, data) => {
+    const formData = new FormData();
+    Object.keys(data).forEach(key => {
+      if (key === 'image' && data[key]) {
+        formData.append(key, data[key]);
+      } else {
+        formData.append(key, data[key]);
+      }
+    });
+    return api.put(`/waste-requests/${id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  },
+  delete: (id) => api.delete(`/waste-requests/${id}`)
 };
+
+export default api;
