@@ -23,12 +23,5 @@ module.exports = defineConfig({
       args[0].title = 'Beekeeper'
       return args
     })
-  },
-  css: {
-    loaderOptions: {
-      sass: {
-        additionalData: `@import "@/assets/styles/variables.scss";`
-      }
-    }
   }
 })
