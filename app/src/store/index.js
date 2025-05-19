@@ -1,11 +1,22 @@
 // app/src/store/index.js
-import Vue from 'vue'
-import Vuex from 'vuex'
+import { createStore } from 'vuex'
+import createPersistedState from 'vuex-persistedstate'
+import drivers from './modules/drivers'
+import vehicles from './modules/vehicles'
+import wasteRequests from './modules/wasteRequests'
 import api from '@/api'
 
-Vue.use(Vuex)
-
-export default new Vuex.Store({
+export default createStore({
+  modules: {
+    drivers,
+    vehicles,
+    wasteRequests
+  },
+  plugins: [
+    createPersistedState({
+      paths: ['drivers', 'vehicles', 'wasteRequests']
+    })
+  ],
   state: {
     user: null,
     token: localStorage.getItem('token') || null,
