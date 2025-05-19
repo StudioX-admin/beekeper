@@ -15,7 +15,8 @@ module.exports = defineConfig({
         '@utils': path.resolve(__dirname, 'src/utils'),
         '@services': path.resolve(__dirname, 'src/services'),
         '@api': path.resolve(__dirname, 'src/api')
-      }
+      },
+      extensions: ['.js', '.vue', '.json']
     }
   },
   chainWebpack: config => {
@@ -23,5 +24,12 @@ module.exports = defineConfig({
       args[0].title = 'Beekeeper'
       return args
     })
+  },
+  css: {
+    loaderOptions: {
+      sass: {
+        additionalData: `@import "@/assets/styles/variables.scss";`
+      }
+    }
   }
 })
