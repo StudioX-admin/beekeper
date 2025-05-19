@@ -1,49 +1,23 @@
 {
-  "name": "beekeper-app",
-  "version": "1.0.0",
+  "name": "beekeper-mobile-pub",
+  "version": "0.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "axios": "^0.27.2",
-    "core-js": "^3.25.0",
-    "vue": "^2.6.14",
-    "vue-router": "^3.5.4",
-    "vuex": "^3.6.2"
+    "pinia": "^2.3.0",
+    "vite-plugin-pages": "^0.32.4",
+    "vite-plugin-vue-layouts": "^0.11.0",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "~4.5.19",
-    "@vue/cli-plugin-eslint": "~4.5.19",
-    "@vue/cli-plugin-router": "~4.5.19",
-    "@vue/cli-plugin-vuex": "~4.5.19",
-    "@vue/cli-service": "~4.5.19",
-    "babel-eslint": "^10.1.0",
-    "eslint": "^6.8.0",
-    "eslint-plugin-vue": "^6.2.2",
-    "sass": "^1.54.8",
-    "sass-loader": "^10.3.1",
-    "vue-template-compiler": "^2.6.14"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/essential",
-      "eslint:recommended"
-    ],
-    "parserOptions": {
-      "parser": "babel-eslint"
-    },
-    "rules": {}
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead"
-  ]
+    "@vitejs/plugin-vue": "^5.2.1",
+    "vite": "^6.0.5",
+    "vite-plugin-vue-devtools": "^7.6.8"
+  }
 }
