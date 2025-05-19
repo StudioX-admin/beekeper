@@ -13,7 +13,8 @@ module.exports = defineConfig({
         '@views': path.resolve(__dirname, 'src/views'),
         '@store': path.resolve(__dirname, 'src/store'),
         '@utils': path.resolve(__dirname, 'src/utils'),
-        '@services': path.resolve(__dirname, 'src/services')
+        '@services': path.resolve(__dirname, 'src/services'),
+        '@api': path.resolve(__dirname, 'src/api')
       }
     }
   },
@@ -22,5 +23,12 @@ module.exports = defineConfig({
       args[0].title = 'Beekeeper'
       return args
     })
+  },
+  css: {
+    loaderOptions: {
+      sass: {
+        additionalData: `@import "@/assets/styles/variables.scss";`
+      }
+    }
   }
 })
