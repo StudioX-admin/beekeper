@@ -2,57 +2,86 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
-const UserSchema = new mongoose.Schema(
-  {
-    username: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true
-    },
-    password: {
-      type: String,
-      required: true
-    },
+const userSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    lowercase: true
+  },
+  password: {
+    type: String,
+    required: true
+  },
+  name: {
+    type: String,
+    required: true
+  },
+  role: {
+    type: String,
+    enum: ['admin', 'transporter', 'processor', 'platform_admin'],
+    required: true
+  },
+  phone: {
+    type: String,
+    required: true
+  },
+  company: {
     name: {
       type: String,
       required: true
     },
-    role: {
-      type: String,
-      enum: ['admin', 'driver'],
-      default: 'driver'
-    },
-    email: {
+    businessNumber: {
       type: String,
       required: true,
-      unique: true,
-      trim: true
+      unique: true
     },
-    phone: {
+    address: {
       type: String,
       required: true
     },
-    profileImage: {
-      type: String
-    },
-    vehicleId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Vehicle'
-    },
-    status: {
+    representative: {
       type: String,
-      enum: ['active', 'inactive', 'suspended'],
-      default: 'active'
+      required: true
+    },
+    contactPhone: {
+      type: String,
+      required: true
+    },
+    businessType: {
+      type: String,
+      enum: ['transporter', 'processor'],
+      required: true
+    },
+    licenseNumber: {
+      type: String,
+      required: true
+    },
+    licenseExpiryDate: {
+      type: Date,
+      required: true
     }
   },
-  {
-    timestamps: true
+  status: {
+    type: String,
+    enum: ['pending', 'active', 'suspended', 'inactive'],
+    default: 'pending'
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
   }
-);
+}, {
+  timestamps: true
+});
 
 // 비밀번호 해싱 미들웨어
-UserSchema.pre('save', async function(next) {
+userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   
   try {
@@ -65,8 +94,16 @@ UserSchema.pre('save', async function(next) {
 });
 
 // 비밀번호 검증 메소드
-UserSchema.methods.comparePassword = async function(candidatePassword) {
+userSchema.methods.comparePassword = async function(candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-module.exports = mongoose.model('User', UserSchema);
+// 비밀번호 필드 제외
+userSchema.methods.toJSON = function() {
+  const user = this.toObject();
+  delete user.password;
+  return user;
+};
+
+module.exports = mongoose.model('User', userSchema);
+
