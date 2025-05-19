@@ -1,41 +1,26 @@
- // web/vue.config.js
-module.exports = {
-  publicPath: '/',
-  outputDir: 'dist',
-  assetsDir: 'assets',
-  productionSourceMap: false,
-  lintOnSave: false,
-  
-  devServer: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5000',
-        changeOrigin: true
+// web/vue.config.js
+const { defineConfig } = require('@vue/cli-service')
+const path = require('path')
+
+module.exports = defineConfig({
+  transpileDependencies: true,
+  configureWebpack: {
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, 'src'),
+        '@assets': path.resolve(__dirname, 'src/assets'),
+        '@components': path.resolve(__dirname, 'src/components'),
+        '@views': path.resolve(__dirname, 'src/views'),
+        '@store': path.resolve(__dirname, 'src/store'),
+        '@utils': path.resolve(__dirname, 'src/utils'),
+        '@services': path.resolve(__dirname, 'src/services')
       }
     }
   },
-  
-  // chainWebpack 설정을 module.exports 객체 내부로 이동
   chainWebpack: config => {
-    config.module.rules.delete('eslint');
-    
-    // SVG 로더 설정
-    const svgRule = config.module.rule('svg');
-    svgRule.uses.clear();
-    svgRule
-      .use('vue-svg-loader')
-      .loader('vue-svg-loader')
-      .options({
-        svgo: {
-          plugins: [
-            { removeTitle: true },
-            { convertColors: { shorthex: false } },
-            { convertPathData: false }
-          ]
-        }
-      });
-
-      // 경로 별칭 추가
-    config.resolve.alias.set('@', require('path').join(__dirname, 'src'));
-  },
-};
+    config.plugin('html').tap(args => {
+      args[0].title = 'Beekeeper'
+      return args
+    })
+  }
+})
