@@ -16,12 +16,25 @@ module.exports = defineConfig({
         '@services': path.resolve(__dirname, 'src/services'),
         '@api': path.resolve(__dirname, 'src/api')
       },
-      extensions: ['.js', '.vue', '.json']
+      extensions: ['.js', '.vue', '.json', '.scss', '.css'],
+      modules: [
+        'node_modules',
+        path.resolve(__dirname, 'src')
+      ]
     }
   },
   chainWebpack: config => {
     config.plugin('html').tap(args => {
       args[0].title = 'Beekeeper'
+      return args
+    })
+
+    // 모듈 해결 실패 시 더 자세한 오류 메시지 표시
+    config.plugin('fork-ts-checker').tap(args => {
+      args[0].logger = {
+        infrastructure: 'silent',
+        issues: 'warning'
+      }
       return args
     })
   },
