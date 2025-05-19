@@ -1,10 +1,10 @@
 [build]
-  command = "npm install && npm run build"
+  command = "npm install --legacy-peer-deps && npm run build"
   publish = "dist"
   base = "app"
 
 [build.environment]
-  NODE_VERSION = "18"
+  NODE_VERSION = "16"
   NPM_FLAGS = "--legacy-peer-deps"
   VITE_API_BASE_URL = "https://beekeeper-api.onrender.com/api"
   VITE_APP_ENV = "production"
