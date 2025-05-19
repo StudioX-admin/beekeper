@@ -2,31 +2,33 @@
   "name": "beekeper-web",
   "version": "1.0.0",
   "private": true,
-  "engines": {
-    "node": "18.x"
-  },
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@vueuse/core": "^10.7.0",
-    "axios": "^1.6.2",
+    "axios": "^1.6.7",
+    "core-js": "^3.36.0",
     "pinia": "^2.1.7",
-    "vue": "^3.3.8",
-    "vue-router": "^4.2.5",
+    "vue": "^3.4.21",
+    "vue-router": "^4.3.0",
     "vuex": "^4.1.0",
     "vuex-persistedstate": "^4.1.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^4.5.0",
-    "eslint": "^8.49.0",
-    "eslint-plugin-vue": "^9.17.0",
-    "sass": "^1.69.5",
-    "vite": "^5.0.0",
-    "vite-plugin-pages": "^0.32.0",
-    "vite-plugin-vue-layouts": "^0.8.0"
+    "@vue/cli-plugin-babel": "~5.0.8",
+    "@vue/cli-plugin-eslint": "~5.0.8",
+    "@vue/cli-plugin-router": "~5.0.8",
+    "@vue/cli-plugin-vuex": "~5.0.8",
+    "@vue/cli-service": "~5.0.8",
+    "@vue/compiler-sfc": "^3.4.21",
+    "eslint": "^8.57.0",
+    "eslint-plugin-vue": "^9.23.0",
+    "sass": "^1.72.0",
+    "sass-loader": "^14.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
