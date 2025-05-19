@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build --mode production --skip-plugins @vue/cli-plugin-eslint",
+    "build": "vue-cli-service build --mode production --skip-plugins @vue/cli-plugin-eslint --report",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
@@ -30,7 +30,8 @@
     "eslint": "^8.56.0",
     "eslint-plugin-vue": "^9.21.1",
     "sass": "^1.71.1",
-    "sass-loader": "^13.3.2"
+    "sass-loader": "^13.3.2",
+    "webpack-bundle-analyzer": "^4.10.1"
   },
   "engines": {
     "node": ">=18.12.0"
