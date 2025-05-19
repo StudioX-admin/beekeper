@@ -1,0 +1,187 @@
+/* 기본 스타일 */
+:root {
+  --primary-color: #FED15E;
+  --error-color: #D32F2F;
+  --text-color: #333;
+  --text-secondary: #666;
+  --border-color: #F2F2F2;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--text-color);
+  background-color: #f5f5f5;
+  line-height: 1.5;
+}
+
+/* 모바일 환경 개선 */
+@media (max-width: 768px) {
+  /* 터치 영역 최소 44px */
+  button, 
+  .back_btn,
+  .add_btn,
+  .page_btn,
+  .action_btn,
+  .delete_btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* 입력 필드 자동 확대 방지 */
+  input[type="text"],
+  input[type="search"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+
+  /* 스크롤 부드럽게 */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* 다이얼로그 스크롤 개선 */
+  .dialog {
+    max-height: 90vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* 터치 피드백 */
+  button:active,
+  .back_btn:active,
+  .add_btn:active,
+  .page_btn:active,
+  .action_btn:active,
+  .delete_btn:active {
+    opacity: 0.7;
+  }
+
+  /* 스크롤바 숨김 */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* 텍스트 선택 방지 */
+  .no-select {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  /* 이미지 최적화 */
+  img {
+    max-width: 100%;
+    height: auto;
+    -webkit-user-drag: none;
+  }
+
+  /* 폼 요소 스타일 통일 */
+  input,
+  textarea,
+  select {
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 4px;
+  }
+
+  /* 버튼 스타일 통일 */
+  button {
+    -webkit-appearance: none;
+    appearance: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  /* 다이얼로그 애니메이션 */
+  .dialog_overlay {
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  .dialog {
+    animation: slideUp 0.3s ease-out;
+  }
+}
+
+/* 애니메이션 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 접근성 개선 */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* 포커스 스타일 */
+:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* 다크 모드 대응 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text-color: #fff;
+    --text-secondary: #ccc;
+    --border-color: #444;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+  }
+
+  body {
+    background-color: #1a1a1a;
+  }
+
+  .dialog {
+    background-color: #2a2a2a;
+  }
+
+  input,
+  textarea,
+  select {
+    background-color: #333;
+    color: var(--text-color);
+  }
+} 

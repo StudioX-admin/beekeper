@@ -1,24 +1,24 @@
 import axios from 'axios';
+import { useAuth } from '@/composables/useAuth';
 
 // 기본 URL 설정
-const API_URL = process.env.VUE_APP_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 // axios 인스턴스 생성
 const apiClient = axios.create({
   baseURL: API_URL,
-  timeout: 15000, // 15초 타임아웃 (모바일 환경은 연결이 불안정할 수 있어 더 길게 설정)
+  timeout: 10000, // 10초 타임아웃 (모바일 환경은 연결이 불안정할 수 있어 더 길게 설정)
   headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
+    'Content-Type': 'application/json'
   }
 });
 
 // 인터셉터: 요청 전 토큰 추가
 apiClient.interceptors.request.use(
   config => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers['x-auth-token'] = token;
+    const { token } = useAuth();
+    if (token.value) {
+      config.headers.Authorization = `Bearer ${token.value}`;
     }
     
     // 오프라인 상태 확인
@@ -37,10 +37,8 @@ apiClient.interceptors.request.use(
 
 // 인터셉터: 응답 처리 (토큰 만료 등)
 apiClient.interceptors.response.use(
-  response => {
-    return response;
-  },
-  error => {
+  response => response,
+  async error => {
     // 네트워크 오류 (오프라인)
     if (!error.response) {
       // 오프라인 요청 대기열에 추가
@@ -50,7 +48,8 @@ apiClient.interceptors.response.use(
     
     // 401 에러 (인증 오류)
     if (error.response && error.response.status === 401) {
-      localStorage.removeItem('token');
+      const { logout } = useAuth();
+      await logout();
       window.location.href = '/login';
     }
     
