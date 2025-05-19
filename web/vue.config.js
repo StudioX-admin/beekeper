@@ -15,12 +15,7 @@ module.exports = defineConfig({
         '@utils': path.resolve(__dirname, 'src/utils'),
         '@services': path.resolve(__dirname, 'src/services'),
         '@api': path.resolve(__dirname, 'src/api')
-      },
-      extensions: ['.js', '.vue', '.json', '.scss', '.css'],
-      modules: [
-        'node_modules',
-        path.resolve(__dirname, 'src')
-      ]
+      }
     }
   },
   chainWebpack: config => {
