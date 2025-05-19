@@ -2,18 +2,16 @@ import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import vueDevTools from 'vite-plugin-vue-devtools'
-import pages from 'vite-plugin-pages';
-import layouts from 'vite-plugin-vue-layouts';
+import Pages from 'vite-plugin-pages'
+import Layouts from 'vite-plugin-vue-layouts'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
-    vueDevTools(),
-    pages({
+    Pages({
       dirs: 'src/pages'
     }),
-    layouts({
+    Layouts({
       layoutsDirs: 'src/layouts',
       defaultLayout: 'default'
     })
