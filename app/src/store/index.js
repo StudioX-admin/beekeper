@@ -1,9 +1,9 @@
 // app/src/store/index.js
 import { createStore } from 'vuex'
 import createPersistedState from 'vuex-persistedstate'
-import drivers from './modules/drivers'
-import vehicles from './modules/vehicles'
-import wasteRequests from './modules/wasteRequests'
+import drivers from '@/store/modules/drivers'
+import vehicles from '@/store/modules/vehicles'
+import wasteRequests from '@/store/modules/wasteRequests'
 import api from '@/api'
 
 export default createStore({
