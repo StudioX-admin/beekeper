@@ -28,15 +28,6 @@ module.exports = defineConfig({
       args[0].title = 'Beekeeper'
       return args
     })
-
-    // 모듈 해결 실패 시 더 자세한 오류 메시지 표시
-    config.plugin('fork-ts-checker').tap(args => {
-      args[0].logger = {
-        infrastructure: 'silent',
-        issues: 'warning'
-      }
-      return args
-    })
   },
   css: {
     loaderOptions: {
