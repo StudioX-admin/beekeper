@@ -7,9 +7,9 @@ Vue.use(Vuex)
 
 // 모듈 가져오기
 import auth from './modules/auth'
-import wasteRequests from './modules/wasteRequests'
-import vehicles from './modules/vehicles'
-import drivers from './modules/drivers'
+import wasteRequests from './reservation'
+import vehicles from './vehicle'
+import drivers from './driver'
 
 export default new Vuex.Store({
   modules: {
