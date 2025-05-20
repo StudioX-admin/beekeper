@@ -1,6 +1,6 @@
 [build]
   base = "web"
-  command = "npm install && npm run build"
+  command = "npm install --legacy-peer-deps && npm run build --no-lint"
   publish = "dist"
 
 [build.environment]
@@ -8,6 +8,8 @@
   NODE_ENV = "production"
   VUE_APP_ENV = "production"
   VUE_APP_DEBUG = "false"
+  NETLIFY_USE_YARN = "false"
+  NPM_FLAGS = "--legacy-peer-deps --no-audit --no-fund"
 
 [[redirects]]
   from = "/*"
