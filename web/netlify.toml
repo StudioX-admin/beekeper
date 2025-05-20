@@ -1,6 +1,6 @@
 [build]
   base = "web"
-  command = "npm install --legacy-peer-deps && npm run build --no-lint"
+  command = "npm install --production=false && node_modules/.bin/vue-cli-service build"
   publish = "dist"
 
 [build.environment]
