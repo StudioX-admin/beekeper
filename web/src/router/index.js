@@ -11,13 +11,13 @@ const router = createRouter({
     {
       path: '/login',
       name: 'login',
-      component: () => import('@/views/auth/Login.vue'),
+      component: () => import('@/views/Login.vue'),
       meta: { guest: true, title: '로그인' }
     },
     {
       path: '/register',
       name: 'register',
-      component: () => import('@/views/auth/Register.vue'),
+      component: () => import('@/views/Register.vue'),
       meta: { guest: true, title: '회원가입' }
     },
     // 수거업체 메뉴
@@ -35,31 +35,25 @@ const router = createRouter({
         {
           path: 'reservations',
           name: 'transporter-reservations',
-          component: () => import('@/views/reservation/ReservationList.vue'),
+          component: () => import('@/views/transporter/ReservationManagement.vue'),
           meta: { title: '예약 관리' }
-        },
-        {
-          path: 'reservations/:id',
-          name: 'transporter-reservation-detail',
-          component: () => import('@/views/reservation/ReservationDetail.vue'),
-          meta: { title: '예약 상세' }
         },
         {
           path: 'contracts',
           name: 'transporter-contracts',
-          component: () => import('@/views/contract/ContractList.vue'),
+          component: () => import('@/views/transporter/ContractManagement.vue'),
           meta: { title: '계약 관리' }
         },
         {
           path: 'vehicles',
           name: 'transporter-vehicles',
-          component: () => import('@/views/vehicle/VehicleList.vue'),
+          component: () => import('@/views/transporter/VehicleManagement.vue'),
           meta: { title: '차량 관리' }
         },
         {
           path: 'users',
           name: 'transporter-users',
-          component: () => import('@/views/user/UserList.vue'),
+          component: () => import('@/views/transporter/UserManagement.vue'),
           meta: { title: '사용자 관리' }
         },
         {
@@ -85,31 +79,25 @@ const router = createRouter({
         {
           path: 'reservations',
           name: 'processor-reservations',
-          component: () => import('@/views/reservation/ProcessorReservationList.vue'),
+          component: () => import('@/views/processor/ReservationManagement.vue'),
           meta: { title: '예약 관리' }
-        },
-        {
-          path: 'reservations/:id',
-          name: 'processor-reservation-detail',
-          component: () => import('@/views/reservation/ReservationDetail.vue'),
-          meta: { title: '예약 상세' }
         },
         {
           path: 'contracts',
           name: 'processor-contracts',
-          component: () => import('@/views/contract/ContractList.vue'),
+          component: () => import('@/views/processor/ContractManagement.vue'),
           meta: { title: '계약 관리' }
         },
         {
           path: 'facilities',
           name: 'processor-facilities',
-          component: () => import('@/views/facility/FacilityList.vue'),
+          component: () => import('@/views/processor/FacilityManagement.vue'),
           meta: { title: '시설 관리' }
         },
         {
           path: 'users',
           name: 'processor-users',
-          component: () => import('@/views/user/UserList.vue'),
+          component: () => import('@/views/processor/UserManagement.vue'),
           meta: { title: '사용자 관리' }
         },
         {
@@ -135,19 +123,13 @@ const router = createRouter({
         {
           path: 'users',
           name: 'admin-users',
-          component: () => import('@/views/admin/Users.vue'),
+          component: () => import('@/views/admin/UserManagement.vue'),
           meta: { title: '사용자 관리' }
-        },
-        {
-          path: 'reservations',
-          name: 'admin-reservations',
-          component: () => import('@/views/admin/Reservations.vue'),
-          meta: { title: '예약 관리' }
         },
         {
           path: 'contracts',
           name: 'admin-contracts',
-          component: () => import('@/views/admin/Contracts.vue'),
+          component: () => import('@/views/admin/ContractManagement.vue'),
           meta: { title: '계약 관리' }
         },
         {
@@ -155,12 +137,6 @@ const router = createRouter({
           name: 'admin-notices',
           component: () => import('@/views/admin/Notices.vue'),
           meta: { title: '공지사항 관리' }
-        },
-        {
-          path: 'inquiries',
-          name: 'admin-inquiries',
-          component: () => import('@/views/admin/Inquiries.vue'),
-          meta: { title: '1:1 문의 관리' }
         },
         {
           path: 'settings',
@@ -182,18 +158,6 @@ const router = createRouter({
       name: 'notice-detail',
       component: () => import('@/views/notice/NoticeDetail.vue'),
       meta: { requiresAuth: true, title: '공지사항 상세' }
-    },
-    {
-      path: '/inquiries',
-      name: 'inquiries',
-      component: () => import('@/views/inquiry/InquiryList.vue'),
-      meta: { requiresAuth: true, title: '1:1 문의' }
-    },
-    {
-      path: '/inquiries/:id',
-      name: 'inquiry-detail',
-      component: () => import('@/views/inquiry/InquiryDetail.vue'),
-      meta: { requiresAuth: true, title: '1:1 문의 상세' }
     },
     {
       path: '/profile',
