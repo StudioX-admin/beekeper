@@ -1,15 +1,13 @@
 [build]
   base = "web"
-  command = "npm install --production=false && node_modules/.bin/vue-cli-service build"
+  command = "npm install && npm run build"
   publish = "dist"
 
 [build.environment]
   NODE_VERSION = "18.19.0"
-  NODE_ENV = "development"  # 빌드 시에는 development로 설정
+  NODE_ENV = "development"
   VUE_APP_ENV = "production"
   VUE_APP_DEBUG = "false"
-  NETLIFY_USE_YARN = "false"
-  NPM_FLAGS = "--legacy-peer-deps --no-audit --no-fund"
 
 [[redirects]]
   from = "/*"
@@ -23,4 +21,4 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     X-Content-Type-Options = "nosniff"
     X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block" 
+    X-XSS-Protection = "1; mode=block"
