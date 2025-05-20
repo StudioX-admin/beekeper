@@ -4,6 +4,7 @@ const path = require('path')
 
 module.exports = defineConfig({
   transpileDependencies: true,
+  lintOnSave: false, // ESLint 검사 비활성화
   configureWebpack: {
     resolve: {
       alias: {
@@ -19,6 +20,9 @@ module.exports = defineConfig({
     }
   },
   chainWebpack: config => {
+    // ESLint 관련 설정 제거
+    config.plugins.delete('eslint');
+    
     config.plugin('html').tap(args => {
       args[0].title = 'Beekeeper'
       return args
