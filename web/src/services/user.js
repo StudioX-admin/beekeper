@@ -42,6 +42,24 @@ export const userService = {
   async rejectUser(id, reason) {
     const response = await api.post(`/users/${id}/reject`, { reason })
     return response.data
+      },
+
+  // 사용자 상태 변경
+  async updateUserStatus(id, status) {
+    const response = await api.put(`/users/${id}/status`, { status })
+    return response.data
+  },
+
+  // 사용자 비밀번호 변경
+  async changePassword(id, passwordData) {
+    const response = await api.put(`/users/${id}/password`, passwordData)
+    return response.data
+  },
+
+  // 사용자 권한 변경
+  async updateUserRole(id, role) {
+    const response = await api.put(`/users/${id}/role`, { role })
+    return response.data
   }
 }
 
