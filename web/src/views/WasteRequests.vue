@@ -230,9 +230,68 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { ref, computed, onMounted } from 'vue'
+import { useRequestStore } from '@/stores/request'
+import { useAuthStore } from '@/stores/auth'
 import { debounce } from 'lodash'
 import RequestList from '@/components/RequestList'
+
+// Store
+const requestStore = useRequestStore()
+const authStore = useAuthStore()
+
+// State
+const searchQuery = ref('')
+const statusFilter = ref('')
+const dateFilter = ref('')
+const loading = ref(false)
+const error = ref(null)
+
+// Computed
+const requests = computed(() => requestStore.requests)
+const totalPages = computed(() => requestStore.totalPages)
+const currentPage = computed(() => requestStore.currentPage)
+const userRole = computed(() => authStore.userRole)
+
+// Methods
+const handleSearch = async () => {
+  try {
+    loading.value = true
+    const params = {
+      query: searchQuery.value,
+      status: statusFilter.value,
+      date: dateFilter.value,
+      page: currentPage.value
+    }
+    await requestStore.fetchRequests(params)
+  } catch (err) {
+    error.value = err.message
+  } finally {
+    loading.value = false
+  }
+}
+
+const changePage = async (page) => {
+  try {
+    loading.value = true
+    const params = {
+      query: searchQuery.value,
+      status: statusFilter.value,
+      date: dateFilter.value,
+      page
+    }
+    await requestStore.fetchRequests(params)
+  } catch (err) {
+    error.value = err.message
+  } finally {
+    loading.value = false
+  }
+}
+
+// Lifecycle hooks
+onMounted(async () => {
+  await handleSearch()
+})
 
 export default {
   name: 'WasteRequests',
@@ -277,11 +336,7 @@ export default {
   }),
   
   computed: {
-    ...mapState({
-      requests: state => state.wasteRequests.items,
-      loading: state => state.wasteRequests.loading,
-      totalRequests: state => state.wasteRequests.total
-    }),
+    ...computed(() => requestStore.requests),
     
     tabs() {
       // 상태별 요청 수 계산
