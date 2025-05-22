@@ -47,13 +47,45 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import { useUserStore } from '@/stores/user'
+import { useRouter } from 'vue-router'
+
+// Store
+const authStore = useAuthStore()
+const userStore = useUserStore()
+
+// State
+const isCollapsed = ref(false)
+
+// Computed
+const userRole = computed(() => authStore.userRole)
+const userName = computed(() => authStore.user?.name || '사용자')
+
+// Methods
+const toggleSidebar = () => {
+  isCollapsed.value = !isCollapsed.value
+}
+
+const handleLogout = async () => {
+  await authStore.logout()
+  router.push('/login')
+}
+
+// Lifecycle hooks
+onMounted(() => {
+  window.addEventListener('toggle-sidebar', toggleSidebar)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('toggle-sidebar', toggleSidebar)
+})
 
 export default {
   name: 'Sidebar',
   data() {
     return {
-      isCollapsed: false,
       menuItems: [
         { name: 'dashboard', title: '대시보드', icon: 'fas fa-tachometer-alt' },
         { name: 'waste-requests', title: '폐기물 요청', icon: 'fas fa-trash', badge: '12' },
@@ -64,35 +96,25 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['currentUser']),
-    
-    userName() {
-      return this.currentUser ? this.currentUser.name : '사용자'
-    },
     userRoleDisplay() {
-      if (!this.currentUser) return ''
-      return this.currentUser.role === 'admin' ? '관리자' : '직원'
+      if (!this.userRole) return ''
+      return this.userRole === 'admin' ? '관리자' : '직원'
     },
     userAvatar() {
-      return this.currentUser && this.currentUser.profileImage 
-        ? this.currentUser.profileImage 
+      return this.userStore.user && this.userStore.user.profileImage 
+        ? this.userStore.user.profileImage 
         : require('@/assets/images/default-avatar.png')
     }
   },
   methods: {
-    ...mapActions(['logout']),
-    
     isActive(routeName) {
       // 현재 라우트 또는 부모 라우트 일치 여부 확인
       return this.$route.name === routeName || 
              (this.$route.matched.length > 0 && 
               this.$route.matched.some(record => record.name === routeName))
     },
-    
-    toggleSidebar() {
-      this.isCollapsed = !this.isCollapsed
-      // 반응형을 위해 이벤트 발생
-      this.$root.$emit('sidebar-toggle', this.isCollapsed)
+    logout() {
+      this.handleLogout()
     }
   },
   // 모바일에서 자동으로 접힘
