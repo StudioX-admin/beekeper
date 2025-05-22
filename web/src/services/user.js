@@ -1,8 +1,8 @@
-import { api } from '@/utils/api'
+import api from './api'
 
 // 공통 사용자 서비스
 export const userService = {
-  // 사용자 목록 조회 (소속 기업별)
+  // 사용자 목록 조회
   async getUsers(params) {
     const response = await api.get('/users', { params })
     return response.data
@@ -14,9 +14,15 @@ export const userService = {
     return response.data
   },
 
+  // 사용자 생성
+  async createUser(userData) {
+    const response = await api.post('/users', userData)
+    return response.data
+  },
+
   // 사용자 수정
-  async updateUser(id, data) {
-    const response = await api.put(`/users/${id}`, data)
+  async updateUser(id, userData) {
+    const response = await api.put(`/users/${id}`, userData)
     return response.data
   },
 
