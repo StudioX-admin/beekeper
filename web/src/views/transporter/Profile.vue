@@ -1,18 +1,60 @@
-      <div class="profile-section">
-        <h2>계좌 정보</h2>
-        <div class="info-grid">
-          <div class="info-item">
-            <label>은행명</label>
-            <span>{{ company.bankName }}</span>
-          </div>
-          <div class="info-item">
-            <label>계좌번호</label>
-            <span>{{ company.bankAccountNumber }}</span>
-          </div>
-          <div class="info-item">
-            <label>예금주</label>
-            <span>{{ company.bankAccountHolder }}</span>
-          </div>
+<template>
+  <div class="company-profile">
+    <div class="profile-header">
+      <h1>{{ company.name }}</h1>
+    </div>
+    <div class="profile-section">
+      <h2>기본 정보</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <label>사업자등록번호</label>
+          <span>{{ company.businessNumber }}</span>
+        </div>
+        <div class="info-item">
+          <label>대표자명</label>
+          <span>{{ company.ownerName }}</span>
+        </div>
+        <div class="info-item">
+          <label>연락처</label>
+          <span>{{ company.phone }}</span>
+        </div>
+        <div class="info-item">
+          <label>이메일</label>
+          <span>{{ company.email }}</span>
+        </div>
+        <div class="info-item">
+          <label>주소</label>
+          <span>{{ company.address }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="profile-section">
+      <h2>운송 면허 정보</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <label>운송 면허 번호</label>
+          <span>{{ company.transportLicenseNumber }}</span>
+        </div>
+        <div class="info-item">
+          <label>운송 면허 만료일</label>
+          <span>{{ formatDate(company.transportLicenseExpiry) }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="profile-section">
+      <h2>계좌 정보</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <label>은행명</label>
+          <span>{{ company.bankName }}</span>
+        </div>
+        <div class="info-item">
+          <label>계좌번호</label>
+          <span>{{ company.bankAccountNumber }}</span>
+        </div>
+        <div class="info-item">
+          <label>예금주</label>
+          <span>{{ company.bankAccountHolder }}</span>
         </div>
       </div>
     </div>
