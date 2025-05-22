@@ -198,8 +198,8 @@
         <h2>계약 삭제</h2>
         <p>정말로 이 계약을 삭제하시겠습니까?</p>
         <div class="dialog-actions">
-          <button @click="showDeleteConfirm = false">취소</button>
-          <button class="delete-btn" @click="deleteContract">삭제</button>
+          <button type="button" @click="showDeleteConfirm = false">취소</button>
+          <button type="button" class="delete-btn" @click="deleteContract">삭제</button>
         </div>
       </div>
     </div>
@@ -216,21 +216,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { useContractStore } from '@/stores/contract'
+import { useUserStore } from '@/stores/user'
 import { format } from 'date-fns'
-import { ko } from 'date-fns/locale'
-import { useStore } from 'vuex'
-import { storeToRefs } from 'pinia'
-import { useUserStore } from '@/store/user'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import { useLoading } from '@/composables/useLoading'
-import { adminContractService } from '@/services/contract'
 
-// 상태
-const contracts = ref([])
-const companies = ref([])
-const currentPage = ref(1)
-const totalPages = ref(1)
+// Store
+const contractStore = useContractStore()
+const userStore = useUserStore()
+
+// State
 const searchQuery = ref('')
 const typeFilter = ref('')
 const statusFilter = ref('')
@@ -240,55 +237,39 @@ const showDialog = ref(false)
 const showDeleteConfirm = ref(false)
 const isEdit = ref(false)
 const selectedContract = ref(null)
-
-// 폼 데이터
 const contractForm = ref({
-  type: 'transporter',
+  type: '',
   company_id: '',
   start_date: '',
   end_date: '',
   amount: '',
-  file: null,
-  notes: ''
+  notes: '',
+  file: null
 })
 
-// 권한 체크
-const userStore = useUserStore()
-const hasPermission = (action) => {
-  const role = userStore.user?.role
-  if (!role) return false
+// Computed
+const contracts = computed(() => contractStore.contracts)
+const currentPage = computed(() => contractStore.currentPage)
+const totalPages = computed(() => contractStore.totalPages)
+const companies = computed(() => contractStore.companies)
+const loading = computed(() => contractStore.loading)
+const error = computed(() => contractStore.error)
 
+// Methods
+const hasPermission = (action) => {
+  const role = userStore.userRole
   const permissions = {
     admin: ['create', 'view', 'edit', 'delete'],
     manager: ['view', 'edit'],
     staff: ['view']
   }
-
   return permissions[role]?.includes(action) || false
 }
 
-// 상태 클래스
-const statusClasses = {
-  active: 'status-active',
-  pending: 'status-pending',
-  expired: 'status-expired',
-  terminated: 'status-terminated'
-}
-
-// 상태 텍스트
-const statusTexts = {
-  active: '활성',
-  pending: '승인대기',
-  expired: '만료',
-  terminated: '해지'
-}
-
-// 날짜 포맷
 const formatDate = (date) => {
-  return format(new Date(date), 'yyyy-MM-dd', { locale: ko })
+  return format(new Date(date), 'yyyy-MM-dd')
 }
 
-// 금액 포맷
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat('ko-KR', {
     style: 'currency',
@@ -296,15 +277,125 @@ const formatCurrency = (amount) => {
   }).format(amount)
 }
 
-// 상태 클래스 가져오기
 const getStatusClass = (status) => {
-  return statusClasses[status] || ''
+  const classes = {
+    active: 'status-active',
+    pending: 'status-pending',
+    expired: 'status-expired',
+    terminated: 'status-terminated'
+  }
+  return classes[status] || ''
 }
 
-// 상태 텍스트 가져오기
 const getStatusText = (status) => {
-  return statusTexts[status] || status
+  const texts = {
+    active: '활성',
+    pending: '승인대기',
+    expired: '만료',
+    terminated: '해지'
+  }
+  return texts[status] || status
 }
+
+const handleSearch = async () => {
+  const params = {
+    query: searchQuery.value,
+    type: typeFilter.value,
+    status: statusFilter.value,
+    startDate: startDate.value,
+    endDate: endDate.value,
+    page: currentPage.value
+  }
+  await contractStore.fetchContracts(params)
+}
+
+const changePage = async (page) => {
+  const params = {
+    query: searchQuery.value,
+    type: typeFilter.value,
+    status: statusFilter.value,
+    startDate: startDate.value,
+    endDate: endDate.value,
+    page
+  }
+  await contractStore.fetchContracts(params)
+}
+
+const openCreateDialog = () => {
+  isEdit.value = false
+  contractForm.value = {
+    type: '',
+    company_id: '',
+    start_date: '',
+    end_date: '',
+    amount: '',
+    notes: '',
+    file: null
+  }
+  showDialog.value = true
+}
+
+const editContract = (contract) => {
+  isEdit.value = true
+  selectedContract.value = contract
+  contractForm.value = { ...contract }
+  showDialog.value = true
+}
+
+const handleTypeChange = async () => {
+  await contractStore.fetchCompanies(contractForm.value.type)
+}
+
+const handleFileUpload = (event) => {
+  contractForm.value.file = event.target.files[0]
+}
+
+const submitContract = async () => {
+  try {
+    if (isEdit.value) {
+      await contractStore.updateContract(selectedContract.value.id, contractForm.value)
+    } else {
+      await contractStore.createContract(contractForm.value)
+    }
+    showDialog.value = false
+    await handleSearch()
+  } catch (err) {
+    console.error('Contract submission error:', err)
+  }
+}
+
+const confirmDelete = (contract) => {
+  selectedContract.value = contract
+  showDeleteConfirm.value = true
+}
+
+const deleteContract = async () => {
+  try {
+    await contractStore.deleteContract(selectedContract.value.id)
+    showDeleteConfirm.value = false
+    await handleSearch()
+  } catch (err) {
+    console.error('Contract deletion error:', err)
+  }
+}
+
+const closeDialog = () => {
+  showDialog.value = false
+  contractForm.value = {
+    type: '',
+    company_id: '',
+    start_date: '',
+    end_date: '',
+    amount: '',
+    notes: '',
+    file: null
+  }
+}
+
+// Lifecycle hooks
+onMounted(async () => {
+  await handleSearch()
+})
 
 // 에러 처리
 const { snackbar, errorMessage, showError } = useErrorHandler()
@@ -312,151 +403,11 @@ const { snackbar, errorMessage, showError } = useErrorHandler()
 // 로딩 상태
 const { isLoading, withLoading } = useLoading()
 
-// 계약 목록 로드
-const loadContracts = async () => {
-  try {
-    await withLoading(async () => {
-      const params = {
-        page: currentPage.value,
-        search: searchQuery.value,
-        type: typeFilter.value,
-        status: statusFilter.value,
-        start_date: startDate.value,
-        end_date: endDate.value
-      }
-      const data = await adminContractService.getContracts(params)
-      contracts.value = data.contracts
-      totalPages.value = data.totalPages
-    })
-  } catch (error) {
-    showError(error)
-  }
-}
-
-// 업체 목록 로드
-const loadCompanies = async (type) => {
-  try {
-    await withLoading(async () => {
-      const data = await adminContractService.getCompanies(type)
-      companies.value = data.companies
-    })
-  } catch (error) {
-    showError(error)
-  }
-}
-
-// 계약 유형 변경 처리
-const handleTypeChange = () => {
-  contractForm.value.company_id = ''
-  loadCompanies(contractForm.value.type)
-}
-
-// 검색 처리
-const handleSearch = () => {
-  currentPage.value = 1
-  loadContracts()
-}
-
-// 페이지 변경
-const changePage = (page) => {
-  currentPage.value = page
-  loadContracts()
-}
-
-// 파일 업로드 처리
-const handleFileUpload = (event) => {
-  const file = event.target.files[0]
-  if (file) {
-    contractForm.value.file = file
-  }
-}
-
-// 계약 등록 다이얼로그 열기
-const openCreateDialog = () => {
-  isEdit.value = false
-  contractForm.value = {
-    type: 'transporter',
-    company_id: '',
-    start_date: '',
-    end_date: '',
-    amount: '',
-    file: null,
-    notes: ''
-  }
-  loadCompanies(contractForm.value.type)
-  showDialog.value = true
-}
-
-// 계약 수정 다이얼로그 열기
-const editContract = (contract) => {
-  isEdit.value = true
-  selectedContract.value = contract
-  contractForm.value = { ...contract }
-  loadCompanies(contract.type)
-  showDialog.value = true
-}
-
 // 계약 상세 보기
 const viewContract = (contract) => {
   // TODO: 계약 상세 페이지로 이동
   console.log('View contract:', contract)
 }
-
-// 계약 삭제 확인
-const confirmDelete = (contract) => {
-  selectedContract.value = contract
-  showDeleteConfirm.value = true
-}
-
-// 계약 삭제
-const deleteContract = async () => {
-  try {
-    await withLoading(async () => {
-      await adminContractService.deleteContract(selectedContract.value.id)
-      showDeleteConfirm.value = false
-      loadContracts()
-    })
-  } catch (error) {
-    showError(error)
-  }
-}
-
-// 계약 저장
-const submitContract = async () => {
-  try {
-    await withLoading(async () => {
-      const formData = new FormData()
-      Object.keys(contractForm.value).forEach(key => {
-        if (key === 'file' && contractForm.value[key]) {
-          formData.append(key, contractForm.value[key])
-        } else {
-          formData.append(key, contractForm.value[key])
-        }
-      })
-
-      if (isEdit.value) {
-        await adminContractService.updateContract(selectedContract.value.id, formData)
-      } else {
-        await adminContractService.createContract(formData)
-      }
-
-      showDialog.value = false
-      loadContracts()
-    })
-  } catch (error) {
-    showError(error)
-  }
-}
-
-// 다이얼로그 닫기
-const closeDialog = () => {
-  showDialog.value = false
-  selectedContract.value = null
-}
-
-onMounted(() => {
-  loadContracts()
-})
 </script>
 
 <style scoped>
