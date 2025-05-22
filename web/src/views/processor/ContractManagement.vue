@@ -113,7 +113,6 @@ import { useUserStore } from '@/stores/user'
 import { format } from 'date-fns'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import { useLoading } from '@/composables/useLoading'
-import { processorContractService } from '@/services/contract'
 
 // Store
 const contractStore = useContractStore()
@@ -174,9 +173,6 @@ const getStatusText = (status) => {
   return texts[status] || status
 }
 
-const { snackbar, errorMessage, showError } = useErrorHandler()
-const { isLoading, withLoading } = useLoading()
-
 const handleSearch = async () => {
   const params = {
     query: searchQuery.value,
@@ -210,6 +206,12 @@ const viewContract = (contract) => {
 onMounted(async () => {
   await handleSearch()
 })
+
+// Error handling
+const { snackbar, errorMessage, showError } = useErrorHandler()
+
+// Loading state
+const { isLoading, withLoading } = useLoading()
 </script>
 
 <style scoped>
