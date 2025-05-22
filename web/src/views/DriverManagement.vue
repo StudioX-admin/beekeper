@@ -215,8 +215,66 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { ref, computed, onMounted } from 'vue'
+import { useUserStore } from '@/stores/user'
+import { useAuthStore } from '@/stores/auth'
 import { debounce } from 'lodash'
+
+// Store
+const userStore = useUserStore()
+const authStore = useAuthStore()
+
+// State
+const searchQuery = ref('')
+const statusFilter = ref('')
+const loading = ref(false)
+const error = ref(null)
+
+// Computed
+const drivers = computed(() => userStore.getUsersByRole('driver'))
+const totalPages = computed(() => userStore.totalPages)
+const currentPage = computed(() => userStore.currentPage)
+const userRole = computed(() => authStore.userRole)
+
+// Methods
+const handleSearch = async () => {
+  try {
+    loading.value = true
+    const params = {
+      query: searchQuery.value,
+      status: statusFilter.value,
+      role: 'driver',
+      page: currentPage.value
+    }
+    await userStore.fetchUsers(params)
+  } catch (err) {
+    error.value = err.message
+  } finally {
+    loading.value = false
+  }
+}
+
+const changePage = async (page) => {
+  try {
+    loading.value = true
+    const params = {
+      query: searchQuery.value,
+      status: statusFilter.value,
+      role: 'driver',
+      page
+    }
+    await userStore.fetchUsers(params)
+  } catch (err) {
+    error.value = err.message
+  } finally {
+    loading.value = false
+  }
+}
+
+// Lifecycle hooks
+onMounted(async () => {
+  await handleSearch()
+})
 
 export default {
   name: 'DriverManagement',
@@ -265,12 +323,10 @@ export default {
   }),
   
   computed: {
-    ...mapState({
-      drivers: state => state.drivers.items,
-      totalDrivers: state => state.drivers.total,
-      loading: state => state.drivers.loading,
-      vehicles: state => state.vehicles.items
-    }),
+    ...computed(() => userStore.getUsersByRole('driver')),
+    ...computed(() => userStore.totalPages),
+    ...computed(() => userStore.currentPage),
+    ...computed(() => authStore.userRole),
     
     availableVehicles() {
       return this.vehicles.filter(vehicle => vehicle.status === 'active')
