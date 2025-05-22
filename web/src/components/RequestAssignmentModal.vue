@@ -110,7 +110,22 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { ref, computed, onMounted } from 'vue'
+import { useUserStore } from '@/stores/user'
+import { useRequestStore } from '@/stores/request'
+
+// Store
+const userStore = useUserStore()
+const requestStore = useRequestStore()
+
+// State
+const selectedDriver = ref(null)
+const selectedVehicle = ref(null)
+const loading = ref(false)
+
+// Computed
+const drivers = computed(() => userStore.getUsersByRole('driver'))
+const vehicles = computed(() => requestStore.availableVehicles)
 
 export default {
   name: 'RequestAssignmentModal',
@@ -126,82 +141,45 @@ export default {
     }
   },
   
-  data: () => ({
-    selectedDriver: null,
-    selectedVehicle: null,
-    loading: false,
-    loadingDrivers: false,
-    loadingVehicles: false
-  }),
-  
-  computed: {
-    ...mapState({
-      drivers: state => state.drivers.items,
-      vehicles: state => state.vehicles.items
-    }),
-    
-    availableDrivers() {
-      return this.drivers.filter(driver => driver.active)
-    },
-    
-    availableVehicles() {
-      return this.vehicles.filter(vehicle => 
-        vehicle.status === 'active' && 
-        (!this.selectedDriver || !this.selectedDriver.vehicleId || 
-         this.selectedDriver.vehicleId === vehicle._id)
-      )
-    },
-    
-    isFormValid() {
-      return this.selectedDriver && this.selectedVehicle
-    }
-  },
-  
-  watch: {
-    visible(val) {
-      if (val) {
-        this.resetForm()
-        this.fetchData()
+  setup(props, { emit }) {
+    // Methods
+    const assignRequest = async () => {
+      if (!selectedDriver.value || !selectedVehicle.value) {
+        return
       }
+
+      try {
+        loading.value = true
+        await requestStore.assignRequest({
+          requestId: props.request._id,
+          driverId: selectedDriver.value,
+          vehicleId: selectedVehicle.value
+        })
+        emit('assigned')
+      } catch (error) {
+        console.error('Assignment error:', error)
+      } finally {
+        loading.value = false
+      }
+    }
+
+    // Lifecycle hooks
+    onMounted(async () => {
+      await userStore.fetchUsers({ role: 'driver' })
+      await requestStore.fetchAvailableVehicles()
+    })
+
+    return {
+      selectedDriver,
+      selectedVehicle,
+      loading,
+      availableDrivers: drivers,
+      availableVehicles: vehicles,
+      assignRequest
     }
   },
   
   methods: {
-    resetForm() {
-      this.selectedDriver = null
-      this.selectedVehicle = null
-      this.loading = false
-    },
-    
-    async fetchData() {
-      this.loadingDrivers = true
-      this.loadingVehicles = true
-      
-      try {
-        // 기사 목록 로드
-        await this.$store.dispatch('drivers/fetchDrivers', {
-          limit: 100,
-          active: true
-        })
-        
-        // 차량 목록 로드
-        await this.$store.dispatch('vehicles/fetchVehicles', {
-          limit: 100,
-          status: 'active'
-        })
-      } catch (err) {
-        console.error('데이터 로드 실패:', err)
-        
-        this.$store.commit('notification/setNotification', {
-          message: '데이터를 불러오는데 실패했습니다',
-          type: 'error'
-        })
-      } finally {
-        this.loadingDrivers = false
-        this.loadingVehicles = false
-      }
-    },
-    
     getInitials(name) {
       if (!name) return '?'
       
@@ -213,48 +191,22 @@ export default {
     },
     
     updateSelectedVehicle() {
-      if (!this.selectedDriver) {
-        this.selectedVehicle = null
+      if (!selectedDriver.value) {
+        selectedVehicle.value = null
         return
       }
       
       // 기사에게 배정된 차량이 있으면 자동 선택
-      if (this.selectedDriver.vehicleId) {
-        const assignedVehicle = this.vehicles.find(v => 
-          v._id === this.selectedDriver.vehicleId && v.status === 'active'
+      if (selectedDriver.value.vehicleId) {
+        const assignedVehicle = vehicles.value.find(v => 
+          v._id === selectedDriver.value.vehicleId && v.status === 'active'
         )
         
         if (assignedVehicle) {
-          this.selectedVehicle = assignedVehicle
+          selectedVehicle.value = assignedVehicle
         }
       } else {
-        this.selectedVehicle = null
-      }
-    },
-    
-    async assignDriver() {
-      if (!this.isFormValid) return
-      
-      this.loading = true
-      
-      try {
-        // 요청에 기사 및 차량 배정
-        await this.$store.dispatch('wasteRequests/assignDriver', {
-          requestId: this.request._id,
-          driverId: this.selectedDriver._id,
-          vehicleId: this.selectedVehicle._id
-        })
-        
-        this.$emit('assigned')
-      } catch (err) {
-        console.error('기사 배정 실패:', err)
-        
-        this.$store.commit('notification/setNotification', {
-          message: '기사 배정에 실패했습니다: ' + (err.response?.data?.message || err.message),
-          type: 'error'
-        })
-      } finally {
-        this.loading = false
+        selectedVehicle.value = null
       }
     }
   }
