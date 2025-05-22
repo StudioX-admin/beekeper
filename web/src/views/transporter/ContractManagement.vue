@@ -200,21 +200,24 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
-import { useStore } from 'vuex'
-import { storeToRefs } from 'pinia'
-import { useUserStore } from '@/store/user'
+import { useContractStore } from '@/stores/contract'
+import { useUserStore } from '@/stores/user'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import { useLoading } from '@/composables/useLoading'
 import { transporterContractService } from '@/services/contract'
 
-// 상태
-const contracts = ref([])
+// Store
+const contractStore = useContractStore()
+const userStore = useUserStore()
+
+// State
+const contracts = computed(() => contractStore.contracts)
 const processors = ref([])
-const currentPage = ref(1)
-const totalPages = ref(1)
+const currentPage = computed(() => contractStore.currentPage)
+const totalPages = computed(() => contractStore.totalPages)
 const searchQuery = ref('')
 const statusFilter = ref('')
 const startDate = ref('')
@@ -224,7 +227,7 @@ const showDeleteConfirm = ref(false)
 const isEdit = ref(false)
 const selectedContract = ref(null)
 
-// 폼 데이터
+// Form data
 const contractForm = ref({
   processor_id: '',
   start_date: '',
@@ -234,43 +237,25 @@ const contractForm = ref({
   notes: ''
 })
 
-// 권한 체크
-const userStore = useUserStore()
-const hasPermission = (action) => {
-  const role = userStore.user?.role
-  if (!role) return false
+// Computed
+const loading = computed(() => contractStore.loading)
+const error = computed(() => contractStore.error)
 
+// Methods
+const hasPermission = (action) => {
+  const role = userStore.userRole
   const permissions = {
     admin: ['create', 'view', 'edit', 'delete'],
-    manager: ['create', 'view', 'edit', 'delete'],
+    manager: ['view', 'edit'],
     staff: ['view']
   }
-
   return permissions[role]?.includes(action) || false
 }
 
-// 상태 클래스
-const statusClasses = {
-  active: 'status-active',
-  pending: 'status-pending',
-  expired: 'status-expired',
-  terminated: 'status-terminated'
-}
-
-// 상태 텍스트
-const statusTexts = {
-  active: '활성',
-  pending: '승인대기',
-  expired: '만료',
-  terminated: '해지'
-}
-
-// 날짜 포맷
 const formatDate = (date) => {
   return format(new Date(date), 'yyyy-MM-dd', { locale: ko })
 }
 
-// 금액 포맷
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat('ko-KR', {
     style: 'currency',
@@ -278,43 +263,29 @@ const formatCurrency = (amount) => {
   }).format(amount)
 }
 
-// 상태 클래스 가져오기
 const getStatusClass = (status) => {
-  return statusClasses[status] || ''
+  const classes = {
+    active: 'status-active',
+    pending: 'status-pending',
+    expired: 'status-expired',
+    terminated: 'status-terminated'
+  }
+  return classes[status] || ''
 }
 
-// 상태 텍스트 가져오기
 const getStatusText = (status) => {
-  return statusTexts[status] || status
+  const texts = {
+    active: '활성',
+    pending: '승인대기',
+    expired: '만료',
+    terminated: '해지'
+  }
+  return texts[status] || status
 }
 
-// 에러 처리
 const { snackbar, errorMessage, showError } = useErrorHandler()
-
-// 로딩 상태
 const { isLoading, withLoading } = useLoading()
 
-// 계약 목록 로드
-const loadContracts = async () => {
-  try {
-    await withLoading(async () => {
-      const params = {
-        page: currentPage.value,
-        search: searchQuery.value,
-        status: statusFilter.value,
-        start_date: startDate.value,
-        end_date: endDate.value
-      }
-      const data = await transporterContractService.getContracts(params)
-      contracts.value = data.contracts
-      totalPages.value = data.totalPages
-    })
-  } catch (error) {
-    showError(error)
-  }
-}
-
-// 처리업체 목록 로드
 const loadProcessors = async () => {
   try {
     await withLoading(async () => {
@@ -326,19 +297,30 @@ const loadProcessors = async () => {
   }
 }
 
-// 검색 처리
-const handleSearch = () => {
-  currentPage.value = 1
-  loadContracts()
+const handleSearch = async () => {
+  const params = {
+    query: searchQuery.value,
+    type: 'transporter',
+    status: statusFilter.value,
+    startDate: startDate.value,
+    endDate: endDate.value,
+    page: currentPage.value
+  }
+  await contractStore.fetchContracts(params)
 }
 
-// 페이지 변경
-const changePage = (page) => {
-  currentPage.value = page
-  loadContracts()
+const changePage = async (page) => {
+  const params = {
+    query: searchQuery.value,
+    type: 'transporter',
+    status: statusFilter.value,
+    startDate: startDate.value,
+    endDate: endDate.value,
+    page
+  }
+  await contractStore.fetchContracts(params)
 }
 
-// 파일 업로드 처리
 const handleFileUpload = (event) => {
   const file = event.target.files[0]
   if (file) {
@@ -346,7 +328,6 @@ const handleFileUpload = (event) => {
   }
 }
 
-// 계약 등록 다이얼로그 열기
 const openCreateDialog = () => {
   isEdit.value = false
   contractForm.value = {
@@ -360,7 +341,6 @@ const openCreateDialog = () => {
   showDialog.value = true
 }
 
-// 계약 수정 다이얼로그 열기
 const editContract = (contract) => {
   isEdit.value = true
   selectedContract.value = contract
@@ -368,32 +348,28 @@ const editContract = (contract) => {
   showDialog.value = true
 }
 
-// 계약 상세 보기
 const viewContract = (contract) => {
   // TODO: 계약 상세 페이지로 이동
   console.log('View contract:', contract)
 }
 
-// 계약 삭제 확인
 const confirmDelete = (contract) => {
   selectedContract.value = contract
   showDeleteConfirm.value = true
 }
 
-// 계약 삭제
 const deleteContract = async () => {
   try {
     await withLoading(async () => {
       await transporterContractService.deleteContract(selectedContract.value.id)
       showDeleteConfirm.value = false
-      loadContracts()
+      await handleSearch()
     })
   } catch (error) {
     showError(error)
   }
 }
 
-// 계약 저장
 const submitContract = async () => {
   try {
     await withLoading(async () => {
@@ -413,22 +389,21 @@ const submitContract = async () => {
       }
 
       showDialog.value = false
-      loadContracts()
+      await handleSearch()
     })
   } catch (error) {
     showError(error)
   }
 }
 
-// 다이얼로그 닫기
 const closeDialog = () => {
   showDialog.value = false
   selectedContract.value = null
 }
 
-onMounted(() => {
-  loadContracts()
-  loadProcessors()
+onMounted(async () => {
+  await handleSearch()
+  await loadProcessors()
 })
 </script>
 
