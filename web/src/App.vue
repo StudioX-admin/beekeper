@@ -31,7 +31,7 @@ export default {
 
 <style>
 /* 퍼블리싱 소스의 글로벌 스타일 적용 */
-@import './assets/css/normalize.css';
+@import './assets/css/reset.css';
 @import './assets/css/global.css';
 
 #app {
