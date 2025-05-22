@@ -13,40 +13,41 @@
           <span class="user-name">{{ userName }}</span>
           <div class="user-avatar">{{ userInitial }}</div>
         </div>
-        <button @click="logout" class="logout-btn">로그아웃</button>
+        <button @click="handleLogout" class="logout-btn">로그아웃</button>
       </div>
     </div>
   </header>
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { useUserStore } from '@/stores/user'
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 
 export default {
   name: 'Header',
   
-  computed: {
-    ...mapGetters(['user']),
+  setup() {
+    const userStore = useUserStore()
+    const router = useRouter()
     
-    userName() {
-      return this.user?.name || '사용자'
-    },
+    const userName = computed(() => userStore.user?.name || '사용자')
+    const userInitial = computed(() => (userStore.user?.name || '?')[0].toUpperCase())
     
-    userInitial() {
-      return (this.user?.name || '?')[0].toUpperCase()
+    const toggleSidebar = () => {
+      window.dispatchEvent(new CustomEvent('toggle-sidebar'))
     }
-  },
-  
-  methods: {
-    ...mapActions(['logout']),
     
-    toggleSidebar() {
-      this.$root.$emit('toggle-sidebar')
-    },
+    const handleLogout = async () => {
+      await userStore.logout()
+      router.push('/login')
+    }
     
-    async handleLogout() {
-      await this.logout()
-      this.$router.push('/login')
+    return {
+      userName,
+      userInitial,
+      toggleSidebar,
+      handleLogout
     }
   }
 }
