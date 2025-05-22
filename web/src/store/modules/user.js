@@ -136,6 +136,65 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  // 사용자 상태 변경
+  const updateUserStatus = async (id, status) => {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await userService.updateUserStatus(id, status)
+      const index = users.value.findIndex(user => user.id === id)
+      if (index !== -1) {
+        users.value[index] = response
+      }
+      if (currentUser.value?.id === id) {
+        currentUser.value = response
+      }
+      return response
+    } catch (err) {
+      error.value = err.message
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // 사용자 비밀번호 변경
+  const changePassword = async (id, passwordData) => {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await userService.changePassword(id, passwordData)
+      return response
+    } catch (err) {
+      error.value = err.message
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // 사용자 권한 변경
+  const updateUserRole = async (id, role) => {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await userService.updateUserRole(id, role)
+      const index = users.value.findIndex(user => user.id === id)
+      if (index !== -1) {
+        users.value[index] = response
+      }
+      if (currentUser.value?.id === id) {
+        currentUser.value = response
+      }
+      return response
+    } catch (err) {
+      error.value = err.message
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     users,
     currentUser,
@@ -148,6 +207,9 @@ export const useUserStore = defineStore('user', () => {
     updateUser,
     deleteUser,
     approveUser,
-    rejectUser
+    rejectUser,
+    updateUserStatus,
+    changePassword,
+    updateUserRole
   }
 })
