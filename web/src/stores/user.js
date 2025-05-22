@@ -2,92 +2,65 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import axios from 'axios'
 
-export const useUserStore = defineStore('user', () => {
+export const useAuthStore = defineStore('auth', () => {
   // State
-  const user = ref(null)
-  const token = ref(localStorage.getItem('token'))
-  const loading = ref(false)
-  const error = ref(null)
+  const token = ref(localStorage.getItem('token') || null)
+  const user = ref(JSON.parse(localStorage.getItem('user')) || null)
 
   // Getters
   const isAuthenticated = computed(() => !!token.value)
-  const userRole = computed(() => user.value?.role)
-  const userName = computed(() => user.value?.name)
+  const userRole = computed(() => user.value?.role || null)
 
   // Actions
   async function login(credentials) {
     try {
-      loading.value = true
-      error.value = null
       const response = await axios.post('/api/auth/login', credentials)
       token.value = response.data.token
       user.value = response.data.user
+      
       localStorage.setItem('token', token.value)
+      localStorage.setItem('user', JSON.stringify(user.value))
+      
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
+      
       return response.data
-    } catch (err) {
-      error.value = err.response?.data?.message || '로그인 중 오류가 발생했습니다.'
-      throw err
-    } finally {
-      loading.value = false
+    } catch (error) {
+      throw error
     }
   }
 
   async function logout() {
-    try {
-      await axios.post('/api/auth/logout')
-    } catch (err) {
-      console.error('Logout error:', err)
-    } finally {
-      token.value = null
-      user.value = null
-      localStorage.removeItem('token')
-    }
+    token.value = null
+    user.value = null
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    delete axios.defaults.headers.common['Authorization']
   }
 
-  async function fetchUserProfile() {
+  async function checkAuth() {
+    if (!token.value) return false
+    
     try {
-      loading.value = true
-      error.value = null
-      const response = await axios.get('/api/auth/profile')
+      const response = await axios.get('/api/auth/me')
       user.value = response.data
-      return response.data
-    } catch (err) {
-      error.value = err.response?.data?.message || '사용자 정보를 가져오는 중 오류가 발생했습니다.'
-      throw err
-    } finally {
-      loading.value = false
-    }
-  }
-
-  async function updateProfile(profileData) {
-    try {
-      loading.value = true
-      error.value = null
-      const response = await axios.put('/api/auth/profile', profileData)
-      user.value = response.data
-      return response.data
-    } catch (err) {
-      error.value = err.response?.data?.message || '프로필 업데이트 중 오류가 발생했습니다.'
-      throw err
-    } finally {
-      loading.value = false
+      localStorage.setItem('user', JSON.stringify(user.value))
+      return true
+    } catch (error) {
+      logout()
+      return false
     }
   }
 
   return {
     // State
-    user,
     token,
-    loading,
-    error,
+    user,
     // Getters
     isAuthenticated,
     userRole,
-    userName,
     // Actions
     login,
     logout,
-    fetchUserProfile,
-    updateProfile
+    checkAuth
   }
-})
+}) 
