@@ -10,7 +10,7 @@
         <input
           type="text"
           v-model="searchQuery"
-          placeholder="수거업체명, 계약번호로 검색"
+          placeholder="계약번호로 검색"
           @input="handleSearch"
         />
       </div>
@@ -44,7 +44,7 @@
         <thead>
           <tr>
             <th>계약번호</th>
-            <th>수거업체</th>
+            <th>업체명</th>
             <th>계약기간</th>
             <th>계약금액</th>
             <th>상태</th>
@@ -54,7 +54,7 @@
         <tbody>
           <tr v-for="contract in contracts" :key="contract.id">
             <td>{{ contract.contract_number }}</td>
-            <td>{{ contract.transporter_name }}</td>
+            <td>{{ contract.company_name }}</td>
             <td>{{ formatDate(contract.start_date) }} ~ {{ formatDate(contract.end_date) }}</td>
             <td>{{ formatCurrency(contract.amount) }}</td>
             <td>
@@ -107,62 +107,46 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { useContractStore } from '@/stores/contract'
+import { useUserStore } from '@/stores/user'
 import { format } from 'date-fns'
-import { ko } from 'date-fns/locale'
-import { useStore } from 'vuex'
-import { storeToRefs } from 'pinia'
-import { useUserStore } from '@/store/user'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import { useLoading } from '@/composables/useLoading'
 import { processorContractService } from '@/services/contract'
 
-// 상태
-const contracts = ref([])
-const currentPage = ref(1)
-const totalPages = ref(1)
+// Store
+const contractStore = useContractStore()
+const userStore = useUserStore()
+
+// State
 const searchQuery = ref('')
 const statusFilter = ref('')
 const startDate = ref('')
 const endDate = ref('')
 
-// 권한 체크
-const userStore = useUserStore()
-const hasPermission = (action) => {
-  const role = userStore.user?.role
-  if (!role) return false
+// Computed
+const contracts = computed(() => contractStore.contracts)
+const currentPage = computed(() => contractStore.currentPage)
+const totalPages = computed(() => contractStore.totalPages)
+const loading = computed(() => contractStore.loading)
+const error = computed(() => contractStore.error)
 
+// Methods
+const hasPermission = (action) => {
+  const role = userStore.userRole
   const permissions = {
-    admin: ['view'],
-    manager: ['view'],
+    admin: ['create', 'view', 'edit', 'delete'],
+    manager: ['view', 'edit'],
     staff: ['view']
   }
-
   return permissions[role]?.includes(action) || false
 }
 
-// 상태 클래스
-const statusClasses = {
-  active: 'status-active',
-  pending: 'status-pending',
-  expired: 'status-expired',
-  terminated: 'status-terminated'
-}
-
-// 상태 텍스트
-const statusTexts = {
-  active: '활성',
-  pending: '승인대기',
-  expired: '만료',
-  terminated: '해지'
-}
-
-// 날짜 포맷
 const formatDate = (date) => {
-  return format(new Date(date), 'yyyy-MM-dd', { locale: ko })
+  return format(new Date(date), 'yyyy-MM-dd')
 }
 
-// 금액 포맷
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat('ko-KR', {
     style: 'currency',
@@ -170,62 +154,61 @@ const formatCurrency = (amount) => {
   }).format(amount)
 }
 
-// 상태 클래스 가져오기
 const getStatusClass = (status) => {
-  return statusClasses[status] || ''
+  const classes = {
+    active: 'status-active',
+    pending: 'status-pending',
+    expired: 'status-expired',
+    terminated: 'status-terminated'
+  }
+  return classes[status] || ''
 }
 
-// 상태 텍스트 가져오기
 const getStatusText = (status) => {
-  return statusTexts[status] || status
+  const texts = {
+    active: '활성',
+    pending: '승인대기',
+    expired: '만료',
+    terminated: '해지'
+  }
+  return texts[status] || status
 }
 
-// 에러 처리
 const { snackbar, errorMessage, showError } = useErrorHandler()
-
-// 로딩 상태
 const { isLoading, withLoading } = useLoading()
 
-// 계약 목록 로드
-const loadContracts = async () => {
-  try {
-    await withLoading(async () => {
-      const params = {
-        page: currentPage.value,
-        search: searchQuery.value,
-        status: statusFilter.value,
-        start_date: startDate.value,
-        end_date: endDate.value
-      }
-      const data = await processorContractService.getContracts(params)
-      contracts.value = data.contracts
-      totalPages.value = data.totalPages
-    })
-  } catch (error) {
-    showError(error)
+const handleSearch = async () => {
+  const params = {
+    query: searchQuery.value,
+    type: 'processor',
+    status: statusFilter.value,
+    startDate: startDate.value,
+    endDate: endDate.value,
+    page: currentPage.value
   }
+  await contractStore.fetchContracts(params)
 }
 
-// 검색 처리
-const handleSearch = () => {
-  currentPage.value = 1
-  loadContracts()
+const changePage = async (page) => {
+  const params = {
+    query: searchQuery.value,
+    type: 'processor',
+    status: statusFilter.value,
+    startDate: startDate.value,
+    endDate: endDate.value,
+    page
+  }
+  await contractStore.fetchContracts(params)
 }
 
-// 페이지 변경
-const changePage = (page) => {
-  currentPage.value = page
-  loadContracts()
-}
-
-// 계약 상세 보기
 const viewContract = (contract) => {
   // TODO: 계약 상세 페이지로 이동
   console.log('View contract:', contract)
 }
 
-onMounted(() => {
-  loadContracts()
+// Lifecycle hooks
+onMounted(async () => {
+  await handleSearch()
 })
 </script>
 
