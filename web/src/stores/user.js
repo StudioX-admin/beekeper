@@ -2,65 +2,91 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import axios from 'axios'
 
-export const useAuthStore = defineStore('auth', () => {
+export const useUserStore = defineStore('user', () => {
   // State
-  const token = ref(localStorage.getItem('token') || null)
-  const user = ref(JSON.parse(localStorage.getItem('user')) || null)
+  const users = ref([])
+  const loading = ref(false)
+  const error = ref(null)
 
   // Getters
-  const isAuthenticated = computed(() => !!token.value)
-  const userRole = computed(() => user.value?.role || null)
+  const getUsersByRole = computed(() => (role) => {
+    return users.value.filter(user => user.role === role)
+  })
 
   // Actions
-  async function login(credentials) {
+  async function fetchUsers(params = {}) {
     try {
-      const response = await axios.post('/api/auth/login', credentials)
-      token.value = response.data.token
-      user.value = response.data.user
-      
-      localStorage.setItem('token', token.value)
-      localStorage.setItem('user', JSON.stringify(user.value))
-      
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
-      
+      loading.value = true
+      error.value = null
+      const response = await axios.get('/api/users', { params })
+      users.value = response.data
       return response.data
-    } catch (error) {
-      throw error
+    } catch (err) {
+      error.value = err.response?.data?.message || '사용자 목록을 가져오는 중 오류가 발생했습니다.'
+      throw err
+    } finally {
+      loading.value = false
     }
   }
 
-  async function logout() {
-    token.value = null
-    user.value = null
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    delete axios.defaults.headers.common['Authorization']
+  async function createUser(userData) {
+    try {
+      loading.value = true
+      error.value = null
+      const response = await axios.post('/api/users', userData)
+      users.value.push(response.data)
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data?.message || '사용자 생성 중 오류가 발생했습니다.'
+      throw err
+    } finally {
+      loading.value = false
+    }
   }
 
-  async function checkAuth() {
-    if (!token.value) return false
-    
+  async function updateUser(id, userData) {
     try {
-      const response = await axios.get('/api/auth/me')
-      user.value = response.data
-      localStorage.setItem('user', JSON.stringify(user.value))
-      return true
-    } catch (error) {
-      logout()
-      return false
+      loading.value = true
+      error.value = null
+      const response = await axios.put(`/api/users/${id}`, userData)
+      const index = users.value.findIndex(u => u.id === id)
+      if (index !== -1) {
+        users.value[index] = response.data
+      }
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data?.message || '사용자 수정 중 오류가 발생했습니다.'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function deleteUser(id) {
+    try {
+      loading.value = true
+      error.value = null
+      await axios.delete(`/api/users/${id}`)
+      users.value = users.value.filter(u => u.id !== id)
+    } catch (err) {
+      error.value = err.response?.data?.message || '사용자 삭제 중 오류가 발생했습니다.'
+      throw err
+    } finally {
+      loading.value = false
     }
   }
 
   return {
     // State
-    token,
-    user,
+    users,
+    loading,
+    error,
     // Getters
-    isAuthenticated,
-    userRole,
+    getUsersByRole,
     // Actions
-    login,
-    logout,
-    checkAuth
+    fetchUsers,
+    createUser,
+    updateUser,
+    deleteUser
   }
-}) 
+})
