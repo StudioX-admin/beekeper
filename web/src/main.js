@@ -2,7 +2,7 @@
 import Vue from 'vue'
 import App from './App.vue'  // 수정된 경로
 import router from './router'
-import store from './store'
+import { createPinia, PiniaVuePlugin } from 'pinia'
 
 // 전역 스타일 임포트
 import './assets/css/variables.css'
@@ -25,6 +25,10 @@ Vue.component('Confirm', Confirm)
 Vue.component('Toast', Toast)
 Vue.component('Header', Header)
 Vue.component('Sidebar', Sidebar)
+
+// Pinia 설정
+Vue.use(PiniaVuePlugin)
+const pinia = createPinia()
 
 // 토스트 플러그인 생성
 const ToastPlugin = {
@@ -82,6 +86,6 @@ Vue.config.productionTip = false
 
 new Vue({
   router,
-  store,
+  pinia,
   render: h => h(App)
 }).$mount('#app')
