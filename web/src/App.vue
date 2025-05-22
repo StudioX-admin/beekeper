@@ -1,9 +1,9 @@
 <!-- web/src/App.vue -->
 <template>
   <div id="app">
-    <SideNav v-if="isAuthenticated" />
+    <Sidebar v-if="isAuthenticated" />
     <div class="main-content" :class="{ 'with-sidebar': isAuthenticated }">
-      <TopNav v-if="isAuthenticated" />
+      <Header v-if="isAuthenticated" />
       <div class="content-wrapper">
         <router-view />
       </div>
@@ -12,14 +12,14 @@
 </template>
 
 <script>
-import SideNav from '@/components/layout/SideNav.vue'
-import TopNav from '@/components/layout/TopNav.vue'
+import Sidebar from '@/components/Sidebar.vue'
+import Header from '@/components/Header.vue'
 
 export default {
   name: 'App',
   components: {
-    SideNav,
-    TopNav
+    Sidebar,
+    Header
   },
   computed: {
     isAuthenticated() {
