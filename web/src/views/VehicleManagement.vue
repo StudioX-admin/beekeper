@@ -294,17 +294,71 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { ref, computed, onMounted } from 'vue'
+import { useVehicleStore } from '@/stores/vehicle'
+import { useAuthStore } from '@/stores/auth'
+
+// Store
+const vehicleStore = useVehicleStore()
+const authStore = useAuthStore()
+
+// State
+const searchQuery = ref('')
+const statusFilter = ref('')
+const loading = ref(false)
+const error = ref(null)
+
+// Computed
+const vehicles = computed(() => vehicleStore.vehicles)
+const totalPages = computed(() => vehicleStore.totalPages)
+const currentPage = computed(() => vehicleStore.currentPage)
+const userRole = computed(() => authStore.userRole)
+
+// Methods
+const handleSearch = async () => {
+  try {
+    loading.value = true
+    const params = {
+      query: searchQuery.value,
+      status: statusFilter.value,
+      page: currentPage.value
+    }
+    await vehicleStore.fetchVehicles(params)
+  } catch (err) {
+    error.value = err.message
+  } finally {
+    loading.value = false
+  }
+}
+
+const changePage = async (page) => {
+  try {
+    loading.value = true
+    const params = {
+      query: searchQuery.value,
+      status: statusFilter.value,
+      page
+    }
+    await vehicleStore.fetchVehicles(params)
+  } catch (err) {
+    error.value = err.message
+  } finally {
+    loading.value = false
+  }
+}
+
+// Lifecycle hooks
+onMounted(async () => {
+  await handleSearch()
+})
 
 export default {
   name: 'VehicleManagement',
   
   data() {
     return {
-      vehicles: [],
       loading: true,
       loadingDrivers: false,
-      statusFilter: '',
       showAddVehicleModal: false,
       showDriverAssignModal: false,
       selectedVehicle: null,
@@ -356,8 +410,6 @@ export default {
   },
   
   methods: {
-    ...mapActions(['fetchDrivers']),
-    
     async fetchVehicles() {
       try {
         this.loading = true
