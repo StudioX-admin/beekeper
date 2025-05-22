@@ -1,99 +1,74 @@
-import api from '@/api'
-import router from '@/router'
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+import api from '@/services/api'
 
-const state = {
-  token: localStorage.getItem('token') || null,
-  user: JSON.parse(localStorage.getItem('user')) || null,
-  loginError: null
-}
+export const useAuthStore = defineStore('auth', () => {
+  const user = ref(null)
+  const token = ref(localStorage.getItem('token'))
 
-const getters = {
-  isAuthenticated: state => !!state.token,
-  currentUser: state => state.user,
-  loginError: state => state.loginError,
-  isAdmin: state => state.user && state.user.role === 'admin'
-}
+  const isAuthenticated = computed(() => !!token.value)
+  const userRole = computed(() => user.value?.role)
 
-const mutations = {
-  SET_TOKEN(state, token) {
-    state.token = token
-    if (token) {
-      localStorage.setItem('token', token)
-    } else {
-      localStorage.removeItem('token')
-    }
-  },
-  SET_USER(state, user) {
-    state.user = user
-    if (user) {
-      localStorage.setItem('user', JSON.stringify(user))
-    } else {
-      localStorage.removeItem('user')
-    }
-  },
-  SET_LOGIN_ERROR(state, error) {
-    state.loginError = error
-  }
-}
-
-const actions = {
-  async login({ commit, dispatch }, credentials) {
-    commit('SET_LOGIN_ERROR', null)
-    dispatch('setLoading', true, { root: true })
-    
+  // 로그인
+  const login = async (credentials) => {
     try {
       const response = await api.post('/auth/login', credentials)
-      const { token, user } = response.data
+      const { token: newToken, user: userData } = response.data
       
-      commit('SET_TOKEN', token)
-      commit('SET_USER', user)
+      token.value = newToken
+      user.value = userData
       
-      // 리다이렉트 확인
-      const redirectPath = router.currentRoute.query.redirect || '/'
-      router.push(redirectPath)
-      
-      return response
+      localStorage.setItem('token', newToken)
+      return userData
     } catch (error) {
-      const errorMessage = error.response && error.response.data.message
-        ? error.response.data.message
-        : '로그인 중 오류가 발생했습니다.'
-      
-      commit('SET_LOGIN_ERROR', errorMessage)
-      dispatch('setError', errorMessage, { root: true })
       throw error
-    } finally {
-      dispatch('setLoading', false, { root: true })
-    }
-  },
-  
-  logout({ commit }) {
-    commit('SET_TOKEN', null)
-    commit('SET_USER', null)
-    router.push('/login')
-  },
-  
-  async refreshToken({ commit, state }) {
-    if (!state.token) return
-    
-    try {
-      const response = await api.post('/auth/refresh-token', {
-        token: state.token
-      })
-      
-      commit('SET_TOKEN', response.data.token)
-      return response.data.token
-    } catch (error) {
-      console.error('토큰 갱신 실패:', error)
-      commit('SET_TOKEN', null)
-      commit('SET_USER', null)
-      router.push('/login')
     }
   }
-}
 
-export default {
-  state,
-  getters,
-  mutations,
-  actions
-}
+  // 로그아웃
+  const logout = async () => {
+    try {
+      await api.post('/auth/logout')
+    } finally {
+      token.value = null
+      user.value = null
+      localStorage.removeItem('token')
+    }
+  }
+
+  // 사용자 정보 조회
+  const fetchUser = async () => {
+    try {
+      const response = await api.get('/auth/me')
+      user.value = response.data
+      return response.data
+    } catch (error) {
+      throw error
+    }
+  }
+
+  // 토큰 갱신
+  const refreshToken = async () => {
+    try {
+      const response = await api.post('/auth/refresh')
+      const { token: newToken } = response.data
+      
+      token.value = newToken
+      localStorage.setItem('token', newToken)
+      return newToken
+    } catch (error) {
+      throw error
+    }
+  }
+
+  return {
+    user,
+    token,
+    isAuthenticated,
+    userRole,
+    login,
+    logout,
+    fetchUser,
+    refreshToken
+  }
+})
