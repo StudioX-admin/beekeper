@@ -191,6 +191,64 @@
     >
       {{ errorMessage }}
     </div>
+
+    <!-- 비밀번호 변경 다이얼로그 -->
+    <div v-if="showPasswordDialog" class="dialog-overlay">
+      <div class="dialog">
+        <h2>비밀번호 변경</h2>
+        <form @submit.prevent="submitPasswordChange">
+          <div class="form-group">
+            <label>현재 비밀번호</label>
+            <input
+              type="password"
+              v-model="passwordForm.currentPassword"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>새 비밀번호</label>
+            <input
+              type="password"
+              v-model="passwordForm.newPassword"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>새 비밀번호 확인</label>
+            <input
+              type="password"
+              v-model="passwordForm.confirmPassword"
+              required
+            />
+          </div>
+          <div class="dialog-actions">
+            <button type="button" @click="closePasswordDialog">취소</button>
+            <button type="submit">변경</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 권한 변경 다이얼로그 -->
+    <div v-if="showRoleDialog" class="dialog-overlay">
+      <div class="dialog">
+        <h2>권한 변경</h2>
+        <form @submit.prevent="submitRoleChange">
+          <div class="form-group">
+            <label>권한</label>
+            <select v-model="roleForm.role" required>
+              <option value="admin">관리자</option>
+              <option value="manager">매니저</option>
+              <option value="staff">일반직원</option>
+            </select>
+          </div>
+          <div class="dialog-actions">
+            <button type="button" @click="closeRoleDialog">취소</button>
+            <button type="submit">변경</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -213,6 +271,16 @@ const showDetailDialog = ref(false)
 const showDeleteConfirm = ref(false)
 const isEdit = ref(false)
 const selectedUser = ref(null)
+const showPasswordDialog = ref(false)
+const showRoleDialog = ref(false)
+const passwordForm = ref({
+  currentPassword: '',
+  newPassword: '',
+  confirmPassword: ''
+})
+const roleForm = ref({
+  role: ''
+})
 
 // 폼 데이터
 const userForm = ref({
@@ -398,6 +466,110 @@ const closeDialog = () => {
 const closeDetailDialog = () => {
   showDetailDialog.value = false
   selectedUser.value = null
+}
+
+// 상태 변경
+const updateStatus = async (user, newStatus) => {
+  try {
+    await withLoading(async () => {
+      await userStore.updateUserStatus(user.id, newStatus)
+      loadUsers()
+    })
+  } catch (error) {
+    showError(error.message)
+  }
+}
+
+// 비밀번호 변경
+const changePassword = async (user) => {
+  try {
+    await withLoading(async () => {
+      await userStore.changePassword(user.id, {
+        currentPassword: passwordForm.value.currentPassword,
+        newPassword: passwordForm.value.newPassword
+      })
+      showPasswordDialog.value = false
+      showError('비밀번호가 성공적으로 변경되었습니다.')
+    })
+  } catch (error) {
+    showError(error.message)
+  }
+}
+
+// 권한 변경
+const updateRole = async (user, newRole) => {
+  try {
+    await withLoading(async () => {
+      await userStore.updateUserRole(user.id, newRole)
+      loadUsers()
+    })
+  } catch (error) {
+    showError(error.message)
+  }
+}
+
+// 비밀번호 변경 다이얼로그 열기
+const openPasswordDialog = (user) => {
+  selectedUser.value = user
+  passwordForm.value = {
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  }
+  showPasswordDialog.value = true
+}
+
+// 권한 변경 다이얼로그 열기
+const openRoleDialog = (user) => {
+  selectedUser.value = user
+  roleForm.value = {
+    role: user.role
+  }
+  showRoleDialog.value = true
+}
+
+// 비밀번호 변경 다이얼로그 닫기
+const closePasswordDialog = () => {
+  showPasswordDialog.value = false
+  selectedUser.value = null
+  passwordForm.value = {
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  }
+}
+
+// 권한 변경 다이얼로그 닫기
+const closeRoleDialog = () => {
+  showRoleDialog.value = false
+  selectedUser.value = null
+  roleForm.value = {
+    role: ''
+  }
+}
+
+// 비밀번호 유효성 검사
+const validatePassword = () => {
+  if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
+    showError('새 비밀번호가 일치하지 않습니다.')
+    return false
+  }
+  if (passwordForm.value.newPassword.length < 8) {
+    showError('비밀번호는 8자 이상이어야 합니다.')
+    return false
+  }
+  return true
+}
+
+// 비밀번호 변경 제출
+const submitPasswordChange = async () => {
+  if (!validatePassword()) return
+  await changePassword(selectedUser.value)
+}
+
+// 권한 변경 제출
+const submitRoleChange = async () => {
+  await updateRole(selectedUser.value, roleForm.value.role)
 }
 
 onMounted(() => {
@@ -627,5 +799,15 @@ th {
   color: white;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.dialog-actions button[type="submit"] {
+  background-color: #4a90e2;
+  color: white;
+}
+
+.dialog-actions button[type="button"] {
+  background-color: #f5f5f5;
+  color: #333;
 }
 </style> 
