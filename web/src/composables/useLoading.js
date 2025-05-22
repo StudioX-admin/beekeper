@@ -3,11 +3,10 @@ import { ref } from 'vue'
 export function useLoading() {
   const isLoading = ref(false)
 
-  const withLoading = async (promise) => {
+  const withLoading = async (fn) => {
     isLoading.value = true
     try {
-      const result = await promise
-      return result
+      await fn()
     } finally {
       isLoading.value = false
     }
