@@ -68,43 +68,37 @@ const router = createRouter({
     {
       path: '/processor',
       component: () => import('@/views/processor/ProcessorLayout.vue'),
-      meta: { requiresAuth: true, roles: ['processor'] },
+      meta: { requiresAuth: true, role: 'processor' },
       children: [
         {
           path: '',
-          name: 'processor-dashboard',
-          component: () => import('@/views/processor/Dashboard.vue'),
-          meta: { title: '대시보드' }
+          name: 'ProcessorDashboard',
+          component: () => import('@/views/processor/Dashboard.vue')
         },
         {
           path: 'reservations',
-          name: 'processor-reservations',
-          component: () => import('@/views/processor/ReservationManagement.vue'),
-          meta: { title: '예약 관리' }
+          name: 'ReservationManagement',
+          component: () => import('@/views/processor/ReservationManagement.vue')
         },
         {
           path: 'contracts',
-          name: 'processor-contracts',
-          component: () => import('@/views/processor/ContractManagement.vue'),
-          meta: { title: '계약 관리' }
+          name: 'ContractManagement',
+          component: () => import('@/views/processor/ContractManagement.vue')
         },
         {
           path: 'facilities',
-          name: 'processor-facilities',
-          component: () => import('@/views/processor/FacilityManagement.vue'),
-          meta: { title: '시설 관리' }
+          name: 'FacilityManagement',
+          component: () => import('@/views/processor/FacilityManagement.vue')
         },
         {
           path: 'users',
-          name: 'processor-users',
-          component: () => import('@/views/processor/UserManagement.vue'),
-          meta: { title: '사용자 관리' }
+          name: 'UserManagement',
+          component: () => import('@/views/processor/UserManagement.vue')
         },
         {
           path: 'profile',
-          name: 'processor-profile',
-          component: () => import('@/views/processor/Profile.vue'),
-          meta: { title: '회사 정보' }
+          name: 'ProcessorProfile',
+          component: () => import('@/views/processor/Profile.vue')
         }
       ]
     },
