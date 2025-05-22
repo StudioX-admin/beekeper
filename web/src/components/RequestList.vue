@@ -102,8 +102,57 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { ref, computed, onMounted } from 'vue'
+import { useRequestStore } from '@/stores/request'
+import { useAuthStore } from '@/stores/auth'
 import RequestAssignmentModal from '@/components/RequestAssignmentModal';
+
+// Store
+const requestStore = useRequestStore()
+const authStore = useAuthStore()
+
+// State
+const loading = ref(false)
+const error = ref(null)
+
+// Computed
+const requests = computed(() => requestStore.requests)
+const userRole = computed(() => authStore.userRole)
+
+// Methods
+const handleStatusChange = async (requestId, newStatus) => {
+  try {
+    loading.value = true
+    await requestStore.updateRequestStatus(requestId, newStatus)
+  } catch (err) {
+    error.value = err.message
+  } finally {
+    loading.value = false
+  }
+}
+
+const handleAssign = async (requestId) => {
+  try {
+    loading.value = true
+    await requestStore.assignRequest(requestId)
+  } catch (err) {
+    error.value = err.message
+  } finally {
+    loading.value = false
+  }
+}
+
+// Lifecycle hooks
+onMounted(async () => {
+  try {
+    loading.value = true
+    await requestStore.fetchRequests()
+  } catch (err) {
+    error.value = err.message
+  } finally {
+    loading.value = false
+  }
+})
 
 export default {
   name: 'RequestList',
@@ -113,14 +162,6 @@ export default {
   },
   
   props: {
-    requests: {
-      type: Array,
-      default: () => []
-    },
-    loading: {
-      type: Boolean,
-      default: false
-    },
     totalItems: {
       type: Number,
       default: 0
@@ -143,10 +184,6 @@ export default {
   }),
   
   computed: {
-    ...mapState({
-      drivers: state => state.drivers.items
-    }),
-    
     headers() {
       const baseHeaders = [
         { text: '고객 정보', value: 'customer.name', width: '15%' },
