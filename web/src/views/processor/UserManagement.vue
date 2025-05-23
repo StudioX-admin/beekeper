@@ -256,7 +256,7 @@
 import { ref, onMounted } from 'vue'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
-import { useUserStore } from '@/store/modules/user'
+import { useUserStore } from '@/stores/user'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import { useLoading } from '@/composables/useLoading'
 
