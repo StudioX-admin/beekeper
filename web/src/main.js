@@ -35,9 +35,6 @@ axios.defaults.headers.common['Content-Type'] = 'application/json'
 app.use(pinia)
 app.use(router)
 
-// Pinia 설정
-app.use(PiniaVuePlugin)
-
 // 토스트 플러그인 생성
 const ToastPlugin = {
   install(app) {
