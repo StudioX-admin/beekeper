@@ -28,7 +28,7 @@ const app = createApp(App)
 const pinia = createPinia()
 
 // Configure axios
-axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+axios.defaults.baseURL = process.env.VUE_APP_API_URL || 'http://localhost:3000'
 axios.defaults.headers.common['Content-Type'] = 'application/json'
 
 // Use plugins
