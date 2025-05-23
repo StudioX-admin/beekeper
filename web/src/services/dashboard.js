@@ -1,5 +1,4 @@
-import { api } from '@/services/api'
-import { api as utilsApi } from '@/utils/api'
+import api from '@/utils/api'
 
 // 수거업체 대시보드 서비스
 export const transporterDashboardService = {
