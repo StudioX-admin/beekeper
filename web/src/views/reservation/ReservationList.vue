@@ -184,8 +184,8 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { useReservationStore } from '@/store/reservation'
-import { useUserStore } from '@/store/user'
+import { useReservationStore } from '@/stores/modules/reservation'
+import { useUserStore } from '@/stores/user'
 import { formatDate } from '@/utils/date'
 
 export default {
