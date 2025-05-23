@@ -336,8 +336,18 @@ export default {
   }),
   
   computed: {
-    ...computed(() => requestStore.requests),
-    
+    requests() {
+      return requestStore.requests
+    },
+    totalPages() {
+      return requestStore.totalPages
+    },
+    currentPage() {
+      return requestStore.currentPage
+    },
+    userRole() {
+      return authStore.userRole
+    },
     tabs() {
       // 상태별 요청 수 계산
       const counts = {
