@@ -72,7 +72,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { useNoticeStore } from '@/stores/notice'
+import { useNoticeStore } from '@/stores/modules/notice'
 import { formatDate } from '@/utils/date'
 
 export default {
