@@ -1,4 +1,4 @@
-import { api } from '@/utils/api'
+import api from '@/utils/api'
 
 // 수거업체 계약 서비스
 export const transporterContractService = {
