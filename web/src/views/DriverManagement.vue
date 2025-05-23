@@ -323,11 +323,18 @@ export default {
   }),
   
   computed: {
-    ...computed(() => userStore.getUsersByRole('driver')),
-    ...computed(() => userStore.totalPages),
-    ...computed(() => userStore.currentPage),
-    ...computed(() => authStore.userRole),
-    
+    drivers() {
+      return userStore.getUsersByRole('driver')
+    },
+    totalPages() {
+      return userStore.totalPages
+    },
+    currentPage() {
+      return userStore.currentPage
+    },
+    userRole() {
+      return authStore.userRole
+    },
     availableVehicles() {
       return this.vehicles.filter(vehicle => vehicle.status === 'active')
     }
