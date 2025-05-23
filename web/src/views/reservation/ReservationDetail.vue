@@ -160,7 +160,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { useReservationStore } from '@/store/reservation'
+import { useReservationStore } from '@/stores/reservation'
 import { formatDate } from '@/utils/date'
 
 export default {
