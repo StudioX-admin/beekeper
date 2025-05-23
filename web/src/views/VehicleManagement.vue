@@ -385,6 +385,18 @@ export default {
   },
   
   computed: {
+    vehicles() {
+      return vehicleStore.vehicles
+    },
+    totalPages() {
+      return vehicleStore.totalPages
+    },
+    currentPage() {
+      return vehicleStore.currentPage
+    },
+    userRole() {
+      return authStore.userRole
+    },
     filteredVehicles() {
       if (!this.statusFilter) {
         return this.vehicles
