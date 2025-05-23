@@ -73,7 +73,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/store/auth'
+import { useAuthStore } from '@/stores/auth'
 
 const drawer = ref(true)
 const router = useRouter()
