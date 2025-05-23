@@ -290,8 +290,8 @@
 
 <script>
 import { mapState, mapActions } from 'pinia'
-import { useNoticeStore } from '@/store/notice'
-
+import { useNoticeStore } from '@/stores/modules/notice'
+  
 export default {
   name: 'AdminNotices',
 
