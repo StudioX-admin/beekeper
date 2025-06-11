@@ -1,6 +1,6 @@
 // web/src/main.js에 스타일 임포트 추가
 import Vue from 'vue'
-import App from './components/App.vue'  // 수정된 경로
+import App from './App.vue'  // 수정된 경로
 import router from './router'
 import store from './store'
 
