@@ -1,6 +1,6 @@
 // web/src/main.js에 스타일 임포트 추가
 import { createApp } from 'vue'
-import { createPinia } from 'pinia'
+import { createPinia, PiniaVuePlugin } from 'pinia'
 import App from './App.vue'  // 수정된 경로
 import router from './router'
 import axios from 'axios'
@@ -21,11 +21,22 @@ import Toast from './components/common/Toast.vue'
 import Header from './components/Header.vue'
 import Sidebar from './components/Sidebar.vue'
 
+// Pinia를 Vue 2에서 사용하기 위한 플러그인
+Vue.use(PiniaVuePlugin)
+
 // Create app instance
 const app = createApp(App)
 
 // Create Pinia instance
 const pinia = createPinia()
+
+Vue.config.productionTip = false
+
+new Vue({
+  router,
+  pinia,
+  render: h => h(App)
+}).$mount('#app')
 
 // Configure axios
 axios.defaults.baseURL = process.env.VUE_APP_API_URL || 'http://localhost:3000'
