@@ -1,5 +1,6 @@
-import { createApp } from 'vue'
-import App from './components/App.vue'
+// web/src/main.js에 스타일 임포트 추가
+import Vue from 'vue'
+import App from './components/App.vue'  // 수정된 경로
 import router from './router'
 import store from './store'
 
@@ -12,38 +13,75 @@ import './assets/css/responsive.css'
 import './assets/css/animations.css'
 import './assets/css/main.css'
 
-// 컴포넌트 임포트
+// 전역 컴포넌트 등록
 import Modal from './components/common/Modal.vue'
 import Confirm from './components/common/Confirm.vue'
 import Toast from './components/common/Toast.vue'
 import Header from './components/Header.vue'
 import Sidebar from './components/Sidebar.vue'
 
-// 앱 생성
-const app = createApp(App)
+Vue.component('Modal', Modal)
+Vue.component('Confirm', Confirm)
+Vue.component('Toast', Toast)
+Vue.component('Header', Header)
+Vue.component('Sidebar', Sidebar)
 
-// 전역 컴포넌트 등록
-app.component('Modal', Modal)
-app.component('Confirm', Confirm)
-app.component('Toast', Toast)
-app.component('Header', Header)
-app.component('Sidebar', Sidebar)
-
-// 토스트 플러그인
+// 토스트 플러그인 생성
 const ToastPlugin = {
-  install(app) {
-    // Vue 3 방식으로 수정 필요
-    app.config.globalProperties.$toast = {
-      success: (message) => console.log('Success:', message),
-      error: (message) => console.log('Error:', message),
-      warning: (message) => console.log('Warning:', message),
-      info: (message) => console.log('Info:', message)
+  install(Vue) {
+    // 전역 토스트 인스턴스 생성
+    const ToastConstructor = Vue.extend(Toast)
+    const toast = new ToastConstructor()
+    toast.$mount()
+    document.body.appendChild(toast.$el)
+
+    // 전역 메서드 추가
+    Vue.prototype.$toast = {
+      show(options) {
+        return toast.addToast(options)
+      },
+      success(message, title, duration) {
+        return toast.addToast({
+          type: 'success',
+          message,
+          title,
+          duration
+        })
+      },
+      error(message, title, duration) {
+        return toast.addToast({
+          type: 'error',
+          message,
+          title,
+          duration
+        })
+      },
+      warning(message, title, duration) {
+        return toast.addToast({
+          type: 'warning',
+          message,
+          title,
+          duration
+        })
+      },
+      info(message, title, duration) {
+        return toast.addToast({
+          type: 'info',
+          message,
+          title,
+          duration
+        })
+      }
     }
   }
 }
 
-app.use(ToastPlugin)
-app.use(store)
-app.use(router)
+Vue.use(ToastPlugin)
 
-app.mount('#app')
+Vue.config.productionTip = false
+
+new Vue({
+  router,
+  store,
+  render: h => h(App)
+}).$mount('#app')
