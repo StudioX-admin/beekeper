@@ -1,8 +1,9 @@
 // web/src/main.js에 스타일 임포트 추가
-import Vue from 'vue'
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
 import App from './App.vue'  // 수정된 경로
 import router from './router'
-import store from './store'
+import axios from 'axios'
 
 // 전역 스타일 임포트
 import './assets/css/variables.css'
@@ -20,23 +21,31 @@ import Toast from './components/common/Toast.vue'
 import Header from './components/Header.vue'
 import Sidebar from './components/Sidebar.vue'
 
-Vue.component('Modal', Modal)
-Vue.component('Confirm', Confirm)
-Vue.component('Toast', Toast)
-Vue.component('Header', Header)
-Vue.component('Sidebar', Sidebar)
+// Create app instance
+const app = createApp(App)
+
+// Create Pinia instance
+const pinia = createPinia()
+
+// Configure axios
+axios.defaults.baseURL = process.env.VUE_APP_API_URL || 'http://localhost:3000'
+axios.defaults.headers.common['Content-Type'] = 'application/json'
+
+// Use plugins
+app.use(pinia)
+app.use(router)
 
 // 토스트 플러그인 생성
 const ToastPlugin = {
-  install(Vue) {
+  install(app) {
     // 전역 토스트 인스턴스 생성
-    const ToastConstructor = Vue.extend(Toast)
+    const ToastConstructor = app.component(Toast.name)
     const toast = new ToastConstructor()
     toast.$mount()
     document.body.appendChild(toast.$el)
-
+    
     // 전역 메서드 추가
-    Vue.prototype.$toast = {
+    app.config.globalProperties.$toast = {
       show(options) {
         return toast.addToast(options)
       },
@@ -76,12 +85,12 @@ const ToastPlugin = {
   }
 }
 
-Vue.use(ToastPlugin)
+app.use(ToastPlugin)
 
-Vue.config.productionTip = false
-
-new Vue({
-  router,
-  store,
-  render: h => h(App)
-}).$mount('#app')
+// Mount app
+app.component('Modal', Modal)
+app.component('Confirm', Confirm)
+app.component('Toast', Toast)
+app.component('Header', Header)
+app.component('Sidebar', Sidebar)
+app.mount('#app')
