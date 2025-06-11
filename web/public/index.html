@@ -14,4 +14,14 @@
     <div id="app"></div>
     <!-- built files will be auto injected -->
   </body>
+  <script>
+  // 서비스워커 해제 코드 (임시)
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+      for (let registration of registrations) {
+        registration.unregister();
+      }
+    });
+  }
+  </script>
 </html>
